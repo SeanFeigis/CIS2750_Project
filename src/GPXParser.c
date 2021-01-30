@@ -2,6 +2,7 @@
 #include <LinkedListAPI.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <strings.h>
 
 GPXdoc* createGPXdoc(char* fileName) {
 
@@ -26,6 +27,28 @@ GPXdoc* createGPXdoc(char* fileName) {
     /*Get the root element node */
     root_element = xmlDocGetRootElement(doc);
 
+
+    gdoc->creator = malloc(256);
+    
+
+    xmlNode *cur_node = root_element;
+    xmlAttr *attr;
+
+    for (attr = cur_node->properties; attr != NULL; attr = attr->next)
+        {
+            xmlNode *value = attr->children;
+            char *attrName = (char *)attr->name;
+            char *cont = (char *)(value->content);
+            
+            if (strcmp(attrName, "version") == 0) {
+                gdoc->version = strtod(cont, &cont);
+            }
+
+            if (strcmp(attrName, "creator") == 0) {
+                strcpy(gdoc->creator, cont);
+            }
+        }
+    
     /*free the document */
     xmlFreeDoc(doc);
 
@@ -39,3 +62,42 @@ GPXdoc* createGPXdoc(char* fileName) {
 
 }
 
+void deleteGPXdoc (GPXdoc* doc) {
+
+    free(doc->creator);
+
+    free(doc);
+
+}
+
+
+/*
+GPXdoc mainIterator(xmlNode * a_node) {
+
+    xmlNode *cur_node = NULL;
+
+    for (cur_node = a_node; cur_node != NULL; cur_node = cur_node->next) {
+        if (cur_node->type == XML_ELEMENT_NODE) {
+            printf("node type: Element, name: %s\n", cur_node->name);
+        }
+
+        // Uncomment the code below if you want to see the content of every node.
+
+        // if (cur_node->content != NULL ){
+        //     printf("  content: %s\n", cur_node->content);
+        // }
+
+        // Iterate through every attribute of the current node
+        xmlAttr *attr;
+        for (attr = cur_node->properties; attr != NULL; attr = attr->next)
+        {
+            xmlNode *value = attr->children;
+            char *attrName = (char *)attr->name;
+            char *cont = (char *)(value->content);
+            printf("\tattribute name: %s, attribute value = %s\n", attrName, cont);
+        }      
+
+    }
+    return(a_node);
+}
+*/
