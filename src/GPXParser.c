@@ -1,5 +1,5 @@
 #include "GPXParser.h"
-#include <LinkedListAPI.h>
+#include "LinkedListAPI.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <strings.h>
@@ -27,27 +27,37 @@ GPXdoc* createGPXdoc(char* fileName) {
     /*Get the root element node */
     root_element = xmlDocGetRootElement(doc);
 
+   /* xmlNs* tempNs;
+    tempNs = (xmlNs*) doc->oldNs;
 
+    printf("%s\n", (char*) tempNs->href);
+    */
     gdoc->creator = malloc(256);
     
-
     xmlNode *cur_node = root_element;
     xmlAttr *attr;
 
-    for (attr = cur_node->properties; attr != NULL; attr = attr->next)
-        {
-            xmlNode *value = attr->children;
-            char *attrName = (char *)attr->name;
-            char *cont = (char *)(value->content);
-            
-            if (strcmp(attrName, "version") == 0) {
-                gdoc->version = strtod(cont, &cont);
-            }
-
-            if (strcmp(attrName, "creator") == 0) {
-                strcpy(gdoc->creator, cont);
-            }
+    for (attr = cur_node->properties; attr != NULL; attr = attr->next) {
+        
+        xmlNode *value = attr->children;
+        char *attrName = (char *)attr->name;
+        char *cont = (char *)(value->content);
+        
+        if (strcmp(attrName, "version") == 0) {
+            gdoc->version = strtod(cont, &cont);
         }
+
+        if (strcmp(attrName, "creator") == 0) {
+            strcpy(gdoc->creator, cont);
+        }
+    }
+
+    
+
+    List* waypointList = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
+    //List* trackList = initializeList();
+    //List* routeList = initializeList();
+
     
     /*free the document */
     xmlFreeDoc(doc);
@@ -62,29 +72,26 @@ GPXdoc* createGPXdoc(char* fileName) {
 
 }
 
-void deleteGPXdoc (GPXdoc* doc) {
-
-    free(doc->creator);
-
-    free(doc);
-
-}
-
-
-/*
-GPXdoc mainIterator(xmlNode * a_node) {
-
+static void
+parse_doc(xmlNode * a_node, List* waypointList)
+{
     xmlNode *cur_node = NULL;
 
     for (cur_node = a_node; cur_node != NULL; cur_node = cur_node->next) {
         if (cur_node->type == XML_ELEMENT_NODE) {
-            printf("node type: Element, name: %s\n", cur_node->name);
+            if (strcmp(cur_node->name == "wpt") == 0) {
+
+            } else if (strcmp(cur_node->name == "trk") == 0) {
+
+            } else if (strcmp(cur_node->name == "rte") == 0) {
+
+            }
         }
 
         // Uncomment the code below if you want to see the content of every node.
 
         // if (cur_node->content != NULL ){
-        //     printf("  content: %s\n", cur_node->content);
+         //    printf("  content: %s\n", cur_node->content);
         // }
 
         // Iterate through every attribute of the current node
@@ -95,9 +102,57 @@ GPXdoc mainIterator(xmlNode * a_node) {
             char *attrName = (char *)attr->name;
             char *cont = (char *)(value->content);
             printf("\tattribute name: %s, attribute value = %s\n", attrName, cont);
-        }      
+        }
 
+        parse_doc(cur_node->children);
     }
-    return(a_node);
 }
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void deleteGPXdoc (GPXdoc* doc) {
+
+    free(doc->creator);
+
+    free(doc);
+
+}
+
+char* GPXdocToString(GPXdoc* doc) {
+
+    char* text = malloc(2000);
+    char* temp = malloc(100);
+    text[0] = '\0';
+
+    sprintf(temp, "The creator is %s\n", doc->creator);
+
+    strcat(text, temp);
+
+    sprintf(temp, "The version is %.1f\n", doc->version);
+
+    strcat(text, temp);
+
+
+    free(temp);
+    return(text);
+}
+
+
