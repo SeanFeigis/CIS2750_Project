@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <strings.h>
 
+TrackSegment* createTrackSegment(xmlNode* node);
+
 void deleteGpxData( void* data) {
 
     if (data == NULL){
@@ -142,9 +144,9 @@ char* trackSegmentToString(void* data) {
 
     tmpSegment = (TrackSegment*)data;
     waypointsTemp = toString(tmpSegment->waypoints);
-    int len = 15 + sizeof(waypointsTemp);
+    int len = 15 + strlen(waypointsTemp);
     tmpString = malloc(len);
-    sprintf(tmpString, "\nWaypoints: %s\n", waypointsTemp);
+    sprintf(tmpString, "\n Waypoints: %s\n", waypointsTemp);
     free(waypointsTemp);
 
     return(tmpString);
@@ -186,9 +188,9 @@ char* trackToString(void* data) {
 
     tmpSegment = toString(tmpTrack->segments);
     otherDataTemp = toString(tmpTrack->otherData);
-    int len = 57 + strlen(tmpSegment) + strlen(otherDataTemp) + strlen(tmpTrack->name); 
+    int len = 66 + strlen(tmpSegment) + strlen(otherDataTemp) + strlen(tmpTrack->name); 
     tmpString = (char*)malloc(len);
-    sprintf(tmpString, "\n\nTrack Name: %s\n Track Segments: %s\n  Other Data: %s\n", tmpTrack->name, tmpSegment, otherDataTemp);
+    sprintf(tmpString, "\n\nTrack Name: %s\n Track Segments: %s\n  Other Data of Track: %s\n", tmpTrack->name, tmpSegment, otherDataTemp);
     free(tmpSegment);
     free(otherDataTemp);
 
@@ -202,6 +204,7 @@ int compareTracks(const void *first, const void *second) {
 Waypoint* createWaypoint(xmlNode* node) {
 
     Waypoint* tmpWaypoint = malloc(sizeof(Waypoint));
+    tmpWaypoint->name = NULL;
     int len = 0;
 
     xmlAttr *attr;
@@ -219,7 +222,6 @@ Waypoint* createWaypoint(xmlNode* node) {
             tmpWaypoint->latitude = strtod(cont, &cont);
             //printf("Latitude saved as %s\n", cont);
         }
-
     }
 
     tmpWaypoint->otherData = initializeList(&gpxDataToString, &deleteGpxData, &compareGpxData);
@@ -262,6 +264,7 @@ Waypoint* createWaypoint(xmlNode* node) {
 Route* createRoute(xmlNode* node) {
 
     Route* tmpRoute = malloc(sizeof(Route));
+    tmpRoute->name = NULL;
     tmpRoute->waypoints = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
     tmpRoute->otherData = initializeList(&gpxDataToString, &deleteGpxData, &compareGpxData);
     xmlNode *a_node = node->children;
@@ -301,7 +304,69 @@ Route* createRoute(xmlNode* node) {
 
 }
 
+Track* createTrack(xmlNode* node) {
 
+    Track* tmpTrack = malloc(sizeof(Track));
+    tmpTrack->name = NULL;
+    tmpTrack->segments = initializeList(&trackSegmentToString, &deleteTrackSegment, &compareTrackSegments);
+    tmpTrack->otherData = initializeList(&gpxDataToString, &deleteGpxData, &compareGpxData);
+    xmlNode *a_node = node->children;
+    xmlNode *cur_node;
+    int len = 0;
+
+    for (cur_node = a_node; cur_node != NULL; cur_node = cur_node->next) {
+        if (cur_node->type == XML_ELEMENT_NODE) {
+            //printf("node type: Element, name: %s\n", cur_node->name);
+            if (strcmp((char*) cur_node->name, "name") == 0) { 
+                char* tempContent = (char*)xmlNodeGetContent(cur_node);
+                len = strlen(tempContent) + 1;
+                tmpTrack->name = (char*)malloc(len);
+                strcpy(tmpTrack->name, tempContent); 
+                free(tempContent);
+            } else if (strcmp((char*) cur_node->name, "trkseg") == 0) {
+                insertBack(tmpTrack->segments, createTrackSegment(cur_node));
+            } else {
+                char* tempContent = (char*)xmlNodeGetContent(cur_node);
+                len = sizeof(GPXData) + ((strlen(tempContent) + 1) * sizeof(char));
+                GPXData* tmpData = (GPXData*) malloc(len);
+                strcpy(tmpData->name, (char*)cur_node->name);
+                strcpy(tmpData->value, tempContent);
+                free(tempContent);
+                insertBack(tmpTrack->otherData, tmpData);
+            }
+
+        }
+    }
+
+    if (tmpTrack->name == NULL) {
+        tmpTrack->name = malloc(1);
+        strcpy(tmpTrack->name, "\0");
+    }
+
+    return tmpTrack;
+
+}
+
+TrackSegment* createTrackSegment(xmlNode* node) {
+
+    TrackSegment* tmpTrackSegment = malloc(sizeof(TrackSegment));
+    tmpTrackSegment->waypoints = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
+
+    xmlNode *a_node = node->children;
+    xmlNode *cur_node;
+
+     for (cur_node = a_node; cur_node != NULL; cur_node = cur_node->next) {
+        if (cur_node->type == XML_ELEMENT_NODE) {
+            //printf("node type: Element, name: %s\n", cur_node->name);
+            if (strcmp((char*) cur_node->name, "trkpt") == 0) {
+                insertBack(tmpTrackSegment->waypoints, createWaypoint(cur_node));
+            }
+        }
+    }
+
+    return(tmpTrackSegment);
+
+}
 
 
 
