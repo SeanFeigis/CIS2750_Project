@@ -93,17 +93,19 @@ void deleteRoute(void* data) {
 char* routeToString(void* data) {
     char* tmpString;
     Route *tmpRoute;
+    char* waypointsTemp;
+    char* otherDataTemp;
 
     if (data == NULL){
 		return NULL;
     }
 
     tmpRoute = (Route*)data;
-    char* waypointsTemp = toString(tmpRoute->waypoints);
-    char* otherDataTemp = toString(tmpRoute->otherData);
+    waypointsTemp = toString(tmpRoute->waypoints);
+    otherDataTemp = toString(tmpRoute->otherData);
     int len = 50 + strlen(tmpRoute->name) + strlen(waypointsTemp) + strlen(otherDataTemp);
     tmpString = (char*)malloc(len);
-    sprintf(tmpString, "Route Name: %s\n\nWaypointData: %s\n\n, Otherdata: %s\n", tmpRoute->name, waypointsTemp, otherDataTemp);
+    sprintf(tmpString, "\n\nRoute Name: %s\n\n  Otherdata: %s\n\n  WaypointData: %s", tmpRoute->name, otherDataTemp, waypointsTemp);
     free(waypointsTemp);
     free(otherDataTemp);
 
@@ -114,10 +116,93 @@ int compareRoutes(const void* first, const void* second) {
     return 0;
 }
 
+void deleteTrackSegment(void * data) {
+
+    TrackSegment* tmpSegment; 
+
+    if (data == NULL){
+		return;
+    }
+
+    tmpSegment = (TrackSegment*)data;
+
+    freeList(tmpSegment->waypoints);
+    free(tmpSegment);
+}
+
+char* trackSegmentToString(void* data) {
+
+    char* tmpString;
+    char* waypointsTemp; 
+    TrackSegment* tmpSegment;
+
+    if (data == NULL){
+		return NULL;
+    }
+
+    tmpSegment = (TrackSegment*)data;
+    waypointsTemp = toString(tmpSegment->waypoints);
+    int len = 15 + sizeof(waypointsTemp);
+    tmpString = malloc(len);
+    sprintf(tmpString, "\nWaypoints: %s\n", waypointsTemp);
+    free(waypointsTemp);
+
+    return(tmpString);
+
+}
+
+int compareTrackSegments(const void *first, const void *second) {
+    return 0;
+}
+
+void deleteTrack(void* data) {
+
+    Track* tmpTrack; 
+
+    if (data == NULL){
+		return;
+    }
+
+    tmpTrack = (Track*)data;
+
+    free(tmpTrack->name);
+    freeList(tmpTrack->segments);
+    freeList(tmpTrack->otherData);
+    free(tmpTrack);
+}
+
+char* trackToString(void* data) {
+
+    Track* tmpTrack;
+    char* tmpString;
+    char* tmpSegment;
+    char* otherDataTemp;
+
+    if (data == NULL){
+		return NULL;
+    }
+
+    tmpTrack = (Track*)data;
+
+    tmpSegment = toString(tmpTrack->segments);
+    otherDataTemp = toString(tmpTrack->otherData);
+    int len = 57 + strlen(tmpSegment) + strlen(otherDataTemp) + strlen(tmpTrack->name); 
+    tmpString = (char*)malloc(len);
+    sprintf(tmpString, "\n\nTrack Name: %s\n Track Segments: %s\n  Other Data: %s\n", tmpTrack->name, tmpSegment, otherDataTemp);
+    free(tmpSegment);
+    free(otherDataTemp);
+
+    return(tmpString);
+}
+
+int compareTracks(const void *first, const void *second) {
+    return 0;
+}
+
 Waypoint* createWaypoint(xmlNode* node) {
 
     Waypoint* tmpWaypoint = malloc(sizeof(Waypoint));
-    int len;
+    int len = 0;
 
     xmlAttr *attr;
     for (attr = node->properties; attr != NULL; attr = attr->next)
@@ -153,9 +238,10 @@ Waypoint* createWaypoint(xmlNode* node) {
                     tmpWaypoint->name = (char*)malloc(len);
                     strcpy(tmpWaypoint->name, tempContent); 
                     free(tempContent);
-                } else {
-                    GPXData* tmpData = malloc(sizeof(GPXData));
+                } else { 
                     char* tempContent = (char*)xmlNodeGetContent(cur_node);
+                    len = sizeof(GPXData) + ((strlen(tempContent) + 1) * sizeof(char));
+                    GPXData* tmpData = (GPXData*) malloc(len);
                     strcpy(tmpData->name, (char*)cur_node->name);
                     strcpy(tmpData->value, tempContent);
                     free(tempContent);
@@ -175,9 +261,12 @@ Waypoint* createWaypoint(xmlNode* node) {
 
 Route* createRoute(xmlNode* node) {
 
-    tmpRoute* = malloc(sizeof(Route));
+    Route* tmpRoute = malloc(sizeof(Route));
     tmpRoute->waypoints = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
-    xmlNode *cur_node = node->children;
+    tmpRoute->otherData = initializeList(&gpxDataToString, &deleteGpxData, &compareGpxData);
+    xmlNode *a_node = node->children;
+    xmlNode *cur_node;
+    int len = 0;
 
     for (cur_node = a_node; cur_node != NULL; cur_node = cur_node->next) {
         if (cur_node->type == XML_ELEMENT_NODE) {
@@ -189,10 +278,11 @@ Route* createRoute(xmlNode* node) {
                 strcpy(tmpRoute->name, tempContent); 
                 free(tempContent);
             } else if (strcmp((char*) cur_node->name, "rtept") == 0) {
-                
+                insertBack(tmpRoute->waypoints, createWaypoint(cur_node));
             } else {
-                GPXData* tmpData = malloc(sizeof(GPXData));
                 char* tempContent = (char*)xmlNodeGetContent(cur_node);
+                len = sizeof(GPXData) + ((strlen(tempContent) + 1) * sizeof(char));
+                GPXData* tmpData = (GPXData*) malloc(len);
                 strcpy(tmpData->name, (char*)cur_node->name);
                 strcpy(tmpData->value, tempContent);
                 free(tempContent);
@@ -201,6 +291,14 @@ Route* createRoute(xmlNode* node) {
 
         }
     }
+
+    if (tmpRoute->name == NULL) {
+        tmpRoute->name = malloc(1);
+        strcpy(tmpRoute->name, "\0");
+    }
+
+    return(tmpRoute);
+
 }
 
 

@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include <strings.h>
 
-void parse_doc(GPXdoc *gdoc, xmlNode * a_node, List* waypointList);
+void parse_doc(GPXdoc *gdoc, xmlNode * a_node, List* waypointList, List* routeList);
 Waypoint* createWaypoint(xmlNode* node);
+Route* createRoute(xmlNode* node);
 
 
 GPXdoc* createGPXdoc(char* fileName) {
@@ -57,12 +58,13 @@ GPXdoc* createGPXdoc(char* fileName) {
     }
 
     List* waypointList = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
+    List* routeList = initializeList(&routeToString, &deleteRoute, &compareWaypoints);
     //List* trackList = initializeList();
-    //List* routeList = initializeList();
 
-    parse_doc(gdoc, root_element->children, waypointList);
+    parse_doc(gdoc, root_element->children, waypointList, routeList);
     
     gdoc->waypoints = waypointList;
+    gdoc->routes = routeList;
 
     /*free the document */
     xmlFreeDoc(doc);
@@ -86,9 +88,9 @@ void parse_doc(GPXdoc *gdoc, xmlNode * a_node, List* waypointList, List* routeLi
             if (strcmp((char*)cur_node->name, "wpt") == 0) {
                 insertBack(waypointList, createWaypoint(cur_node));
                 //printf("Encountered Waypoint\n");
-            } else if (strcmp((char*)cur_node->name, "trk") == 0) {
-                insertBack(routeList, createRoute(cur_node));
             } else if (strcmp((char*)cur_node->name, "rte") == 0) {
+                insertBack(routeList, createRoute(cur_node));
+            } else if (strcmp((char*)cur_node->name, "trk") == 0) {
 
             }
         }
@@ -108,6 +110,8 @@ void deleteGPXdoc (GPXdoc* doc) {
 
     freeList(doc->waypoints);
 
+    freeList(doc->routes);
+
     free(doc);
 
 }
@@ -116,6 +120,9 @@ char* GPXdocToString(GPXdoc* doc) {
 
     char* text = malloc(2000);
     char* temp = malloc(100);
+    char* waypointTemp;
+    char* routeTemp;
+
     text[0] = '\0';
 
     sprintf(temp, "The creator is %s\n", doc->creator);
@@ -124,12 +131,17 @@ char* GPXdocToString(GPXdoc* doc) {
     sprintf(temp, "The version is %.1f\n", doc->version);
     strcat(text, temp);
     
-    char* temp2 = toString(doc->waypoints);
-    strcat(text, temp2);
+    waypointTemp = toString(doc->waypoints);
+    strcat(text, waypointTemp);
+
+    routeTemp = toString(doc->routes); 
+    strcat(text, routeTemp);
+
     strcat(text, "\n");
 
     free(temp);
-    free(temp2);
+    free(waypointTemp);
+    free(routeTemp);
     return(text);
 }
 
