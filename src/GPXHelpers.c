@@ -213,8 +213,6 @@ Waypoint* createWaypoint(xmlNode* node) {
         xmlNode *value = attr->children;
         char *attrName = (char *)attr->name;
         char *cont = (char *)(value->content);
-        //printf("\tattribute name: %s, attribute value = %s\n", attrName, cont);
-
         if (strcmp(attrName, "lon") == 0) {
             tmpWaypoint->longitude = strtod(cont, &cont);
             //printf("Longitude saved as %s\n", cont);
@@ -257,7 +255,6 @@ Waypoint* createWaypoint(xmlNode* node) {
         tmpWaypoint->name = malloc(1);
         strcpy(tmpWaypoint->name, "\0");
     }
-
     return(tmpWaypoint);
 }
 
@@ -291,7 +288,6 @@ Route* createRoute(xmlNode* node) {
                 free(tempContent);
                 insertBack(tmpRoute->otherData, tmpData);
             }
-
         }
     }
 
@@ -299,9 +295,7 @@ Route* createRoute(xmlNode* node) {
         tmpRoute->name = malloc(1);
         strcpy(tmpRoute->name, "\0");
     }
-
     return(tmpRoute);
-
 }
 
 Track* createTrack(xmlNode* node) {
@@ -334,7 +328,6 @@ Track* createTrack(xmlNode* node) {
                 free(tempContent);
                 insertBack(tmpTrack->otherData, tmpData);
             }
-
         }
     }
 
@@ -367,8 +360,3 @@ TrackSegment* createTrackSegment(xmlNode* node) {
     return(tmpTrackSegment);
 
 }
-
-
-
-
-
