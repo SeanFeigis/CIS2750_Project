@@ -85,6 +85,22 @@ GPXdoc* createGPXdoc(char* fileName) {
     return(gdoc);
 }
 
+
+GPXdoc* createValidGPXdoc(char* fileName, char* gpxSchemaFile) {
+    return NULL;
+}
+
+bool writeGPX(GPXdoc* doc, char* fileName) {
+    return FALSE; 
+}
+
+bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
+    return FALSE;
+}
+
+
+
+
 void deleteGPXdoc (GPXdoc* doc) {
 
     if (doc == NULL) {
