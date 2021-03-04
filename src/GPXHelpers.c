@@ -5,7 +5,10 @@
 #include <strings.h>
 
 TrackSegment* createTrackSegment(xmlNode* node);
-void createxmlWaypoint(Waypoint* tempWaypoint, xmlNodePtr root_node);
+void createxmlWaypoint(Waypoint* tempWaypoint, xmlNodePtr root_node, char* wayPointType);
+void createxmlRoute(Route* tempRoute, xmlNodePtr root_node, char* wayPointType, char* routeType);
+void createxmlTrack(Track* tempTrack, xmlNodePtr root_node, char* wayPointType, char* routeType);
+void createxmlTrackSegment(TrackSegment* tempTrackSegment, xmlNodePtr root_node, char* wayPointType, char* routeType);
 
 void deleteGpxData( void* data) {
 
@@ -368,116 +371,63 @@ xmlDoc* GPXdocToXmlDoc(GPXdoc* doc) {
     xmlDocPtr docPtr = NULL;       /* document pointer */
     xmlNodePtr root_node = NULL;/* node pointers */
     Waypoint* tempWaypoint;
-    GPXData* tempGPXData;
     Route* tempRoute;
     Track* tempTrack;
-    TrackSegment* tempTrackSegment;
     ListIterator tempIterator;
-    ListIterator tempIterator2;
-    ListIterator tempIterator3;
+    
+
     LIBXML_TEST_VERSION;
 
     docPtr = xmlNewDoc(BAD_CAST "1.0");
-    root_node = xmlNewNode(NULL, BAD_CAST "root");
+    root_node = xmlNewNode(NULL, BAD_CAST "gpx");
 
     xmlDocSetRootElement(docPtr, root_node);
 
-    if (doc->creator != NULL) {
-        xmlNewProp(root_node, BAD_CAST "creator", BAD_CAST doc->creator);
-    } else {
-        return (NULL);
-    }
-
     char* versionTemp = malloc(256);
-    sprintf(versionTemp, "%f.2", doc->version);
-    xmlNewProp(root_node, BAD_CAST "creator", BAD_CAST versionTemp);
+    sprintf(versionTemp, "%.1f", doc->version);
+    xmlNewProp(root_node, BAD_CAST "version", BAD_CAST versionTemp);
     free(versionTemp);
 
+
+    xmlNewProp(root_node, BAD_CAST "creator", BAD_CAST doc->creator);
+    
     xmlNsPtr nsPtr;
-    if (doc->namespace != NULL) {
-        nsPtr = xmlNewNs(root_node, (xmlChar*) (doc->namespace), NULL);
-        xmlSetNs(root_node, nsPtr);
-    }
+    nsPtr = xmlNewNs(root_node, (xmlChar*) (doc->namespace), NULL);
+    xmlSetNs(root_node, nsPtr);
+    
 
     
     tempIterator = createIterator(doc->waypoints);
     for(tempWaypoint = nextElement(&tempIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&tempIterator)) {
-        /*
-        xmlNodePtr node = xmlNewNode(NULL, BAD_CAST "wpt");
-        xmlAddChild(root_node, node);
-
-        char* positionTemp = malloc(256);
-        sprintf(positionTemp, "%.6f", tempWaypoint->latitude);
-        xmlNewProp(node, BAD_CAST "lat", BAD_CAST positionTemp);
-        sprintf(positionTemp, "%.6f", tempWaypoint->longitude);
-        xmlNewProp(node, BAD_CAST "lon", BAD_CAST positionTemp);
-        free(positionTemp);
-        xmlNewChild(node, NULL, BAD_CAST "name", BAD_CAST tempWaypoint->name);
-
-        tempIterator2 = createIterator(tempWaypoint->otherData);
-        for (tempGPXData = nextElement(&tempIterator2); tempGPXData != NULL; tempGPXData = nextElement(&tempIterator2)) {
-            xmlNewChild(node, NULL, BAD_CAST tempGPXData->name, BAD_CAST tempGPXData->value);
-        } */
-
-        createxmlWaypoint(tempWaypoint, root_node);
-
+        
+        createxmlWaypoint(tempWaypoint, root_node, "wpt");
     }
 
     tempIterator = createIterator(doc->routes);
     for(tempRoute = nextElement(&tempIterator); tempRoute != NULL; tempRoute = nextElement(&tempIterator)) {
 
-        xmlNodePtr node = xmlNewNode(NULL, BAD_CAST "rte");
-        xmlAddChild(root_node, node);
-
-        xmlNewChild(node, NULL, BAD_CAST "name", BAD_CAST tempRoute->name);
-
-        tempIterator2 = createIterator(tempRoute->otherData);
-        for (tempGPXData = nextElement(&tempIterator2); tempGPXData != NULL; tempGPXData = nextElement(&tempIterator2)) {
-            xmlNewChild(node, NULL, BAD_CAST tempGPXData->name, BAD_CAST tempGPXData->value);
-        }
-
-
-        tempIterator2 = createIterator(tempRoute->waypoints);
-        for(tempWaypoint = nextElement(&tempIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&tempIterator)) {
-            
-            xmlNodePtr node2 = xmlNewNode(NULL, BAD_CAST "rtept");
-            xmlAddChild(node, node2);
-
-            char* positionTemp = malloc(256);
-            sprintf(positionTemp, "%.6f", tempWaypoint->latitude);
-            xmlNewProp(node2, BAD_CAST "lat", BAD_CAST positionTemp);
-            sprintf(positionTemp, "%.6f", tempWaypoint->longitude);
-            xmlNewProp(node2, BAD_CAST "lon", BAD_CAST positionTemp);
-
-            xmlNewChild(node2, NULL, BAD_CAST "name", BAD_CAST tempWaypoint->name);
-
-            tempIterator3 = createIterator(tempWaypoint->otherData);
-            for (tempGPXData = nextElement(&tempIterator2); tempGPXData != NULL; tempGPXData = nextElement(&tempIterator2)) {
-                xmlNewChild(node2, NULL, BAD_CAST tempGPXData->name, BAD_CAST tempGPXData->value);
-            }
-
-        }
-
-
-
-
-       
+        createxmlRoute(tempRoute, root_node, "rtept", "rte");
 
     }
 
+    tempIterator = createIterator(doc->tracks);
+    for (tempTrack = nextElement(&tempIterator); tempTrack != NULL; tempTrack = nextElement(&tempIterator)) {
+
+        createxmlTrack(tempTrack, root_node, "trkpt", "trkseg");
+
+    }
 
     xmlCleanupParser();
-    xmlMemoryDump();
     return(docPtr);
 }
 
 
-void createxmlWaypoint(Waypoint* tempWaypoint, xmlNodePtr root_node) {
-    ListIterator tempIterator;
+void createxmlWaypoint(Waypoint* tempWaypoint, xmlNodePtr root_node, char* wayPointType) {
+    ListIterator tempIterator;   
     GPXData* tempGPXData;
 
 
-    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST "wpt");
+    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST wayPointType);
     xmlAddChild(root_node, node);
 
     char* positionTemp = malloc(256);
@@ -486,14 +436,112 @@ void createxmlWaypoint(Waypoint* tempWaypoint, xmlNodePtr root_node) {
     sprintf(positionTemp, "%.6f", tempWaypoint->longitude);
     xmlNewProp(node, BAD_CAST "lon", BAD_CAST positionTemp);
     free(positionTemp);
-    xmlNewChild(node, NULL, BAD_CAST "name", BAD_CAST tempWaypoint->name);
 
+    if (strcmp(tempWaypoint->name, "") != 0) {
+        xmlNewChild(node, NULL, BAD_CAST "name", BAD_CAST tempWaypoint->name);
+    }
+    
     tempIterator = createIterator(tempWaypoint->otherData);
+    for (tempGPXData = nextElement(&tempIterator); tempGPXData != NULL; tempGPXData = nextElement(&tempIterator)) {
+        xmlNewChild(node, NULL, BAD_CAST tempGPXData->name, BAD_CAST tempGPXData->value);
+    }
+}
+
+void createxmlRoute(Route* tempRoute, xmlNodePtr root_node, char* wayPointType, char* routeType) {
+    ListIterator tempIterator;
+    GPXData* tempGPXData;
+    Waypoint* tempWaypoint;
+
+    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST routeType);
+    xmlAddChild(root_node, node);
+
+    if (strcmp(tempRoute->name, "") != 0) {
+        xmlNewChild(node, NULL, BAD_CAST "name", BAD_CAST tempRoute->name);
+    }
+
+    tempIterator = createIterator(tempRoute->otherData);
     for (tempGPXData = nextElement(&tempIterator); tempGPXData != NULL; tempGPXData = nextElement(&tempIterator)) {
         xmlNewChild(node, NULL, BAD_CAST tempGPXData->name, BAD_CAST tempGPXData->value);
     }
 
 
+    tempIterator = createIterator(tempRoute->waypoints);
+    for(tempWaypoint = nextElement(&tempIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&tempIterator)) {
+        
+        createxmlWaypoint(tempWaypoint, node, wayPointType);
+    }
 }
+
+void createxmlTrack(Track* tempTrack, xmlNodePtr root_node, char* wayPointType, char* routeType) {
+    ListIterator tempIterator;
+    TrackSegment* tempTrackSegment;
+    GPXData* tempGPXData;
+
+    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST "trk");
+    xmlAddChild(root_node, node);
+
+    if (strcmp(tempTrack->name, "") != 0) {
+        xmlNewChild(node, NULL, BAD_CAST "name", BAD_CAST tempTrack->name);
+    }
+
+    tempIterator = createIterator(tempTrack->otherData);
+    for (tempGPXData = nextElement(&tempIterator); tempGPXData != NULL; tempGPXData = nextElement(&tempIterator)) {
+        xmlNewChild(node, NULL, BAD_CAST tempGPXData->name, BAD_CAST tempGPXData->value);
+    }
+
+    tempIterator = createIterator(tempTrack->segments);
+    for(tempTrackSegment = nextElement(&tempIterator); tempTrackSegment != NULL; tempTrackSegment = nextElement(&tempIterator)) {
+        createxmlTrackSegment(tempTrackSegment, node, wayPointType, routeType);
+    }
+
+}
+
+void createxmlTrackSegment(TrackSegment* tempTrackSegment, xmlNodePtr root_node, char* wayPointType, char* routeType) {
+    ListIterator tempIterator;
+    Waypoint* tempWaypoint;
+
+    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST "trkseg");
+    xmlAddChild(root_node, node);
+
+    tempIterator = createIterator(tempTrackSegment->waypoints);
+    for(tempWaypoint = nextElement(&tempIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&tempIterator)) {
+        createxmlWaypoint(tempWaypoint, node, wayPointType);
+    }
+}
+
+
+bool validateXML(xmlDoc* doc, char* xsd) {
+    //Code used from http://knol2share.blogspot.com/2009/05/validate-xml-against-xsd-in-c.html
+    //printf("\n\n\n Beginning Validation...\n\n\n");
+    xmlSchemaPtr schema = NULL;
+    xmlSchemaParserCtxtPtr ctxt;
+    int ret;
+
+    ctxt = xmlSchemaNewParserCtxt(xsd);
+
+    xmlSchemaSetParserErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
+    schema = xmlSchemaParse(ctxt);
+    xmlSchemaFreeParserCtxt(ctxt);
+
+    xmlSchemaValidCtxtPtr ctxtV;
+    
+    ctxtV = xmlSchemaNewValidCtxt(schema);
+    xmlSchemaSetValidErrors(ctxtV, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
+
+    ret = xmlSchemaValidateDoc(ctxtV, doc);
+
+    xmlSchemaFreeValidCtxt(ctxtV);
+    xmlSchemaFree(schema);
+    xmlSchemaCleanupTypes();
+    xmlCleanupParser();
+
+    if (ret == 0) {
+        return true;
+    }  
+
+    return false;
+
+}
+
 
 
