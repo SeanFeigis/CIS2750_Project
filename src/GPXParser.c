@@ -7,22 +7,29 @@
 Waypoint* createWaypoint(xmlNode* node);
 Route* createRoute(xmlNode* node);
 Track* createTrack(xmlNode* node);
+bool validateXML(xmlDoc* doc, char* xsd);
+xmlDoc* GPXdocToXmlDoc(GPXdoc* doc);
 
 
 GPXdoc* createGPXdoc(char* fileName) {
 
     xmlDoc *doc = NULL;
     xmlNode *root_element = NULL;
-
-    GPXdoc* gdoc = malloc(sizeof(GPXdoc));
   
     LIBXML_TEST_VERSION
 
     doc = xmlReadFile(fileName, NULL, 0);
 
+    if (fileName == NULL) {
+        return NULL;
+    }
+
     if (doc == NULL) {
+        free(doc);
         return(NULL);
     }
+
+    GPXdoc* gdoc = malloc(sizeof(GPXdoc));
 
     root_element = xmlDocGetRootElement(doc);
     
@@ -87,15 +94,237 @@ GPXdoc* createGPXdoc(char* fileName) {
 
 
 GPXdoc* createValidGPXdoc(char* fileName, char* gpxSchemaFile) {
-    return NULL;
+
+    
+    xmlDoc *doc = NULL;
+    xmlNode *root_element = NULL;
+
+    if (fileName == NULL || gpxSchemaFile == NULL) {
+        return(NULL);
+    }
+  
+    LIBXML_TEST_VERSION
+
+    doc = xmlReadFile(fileName, NULL, 0);
+
+    if (validateXML(doc, gpxSchemaFile) == false) {
+        free(doc);
+        return NULL;
+    }
+
+    GPXdoc* gdoc = malloc(sizeof(GPXdoc));
+
+    root_element = xmlDocGetRootElement(doc);
+    
+    gdoc->creator = NULL;
+    gdoc->version = 0;
+    gdoc->namespace[0] = '\0';
+
+    xmlNs* tempNs;
+    tempNs = (xmlNs*) root_element->ns;
+    strcpy(gdoc->namespace, (char*) tempNs->href);
+
+    xmlNode *cur_node = root_element;
+    xmlAttr *attr;
+
+    for (attr = cur_node->properties; attr != NULL; attr = attr->next) {
+        
+        xmlNode *value = attr->children;
+        char *attrName = (char *)attr->name;
+        char *cont = (char *)(value->content);
+        
+        if (strcmp(attrName, "version") == 0) {
+            gdoc->version = strtod(cont, &cont);
+        }
+
+        if (strcmp(attrName, "creator") == 0) {
+            gdoc->creator = malloc(strlen(cont)+1);
+            strcpy(gdoc->creator, cont);
+        }
+    }
+
+    if (gdoc->creator == NULL) {
+        gdoc->creator = malloc(1);
+        strcpy(gdoc->creator, "\0");
+    }
+
+    List* waypointList = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
+    List* routeList = initializeList(&routeToString, &deleteRoute, &compareWaypoints);
+    List* trackList = initializeList(&trackToString, &deleteTrack, &compareTracks);
+
+    cur_node = NULL;
+    for (cur_node = root_element->children; cur_node != NULL; cur_node = cur_node->next) {
+        if (cur_node->type == XML_ELEMENT_NODE) {
+            if (strcmp((char*)cur_node->name, "wpt") == 0) {
+                insertBack(waypointList, createWaypoint(cur_node));
+            } else if (strcmp((char*)cur_node->name, "rte") == 0) {
+                insertBack(routeList, createRoute(cur_node));
+            } else if (strcmp((char*)cur_node->name, "trk") == 0) {
+                insertBack(trackList, createTrack(cur_node));
+            }
+        }
+    }
+
+    gdoc->waypoints = waypointList;
+    gdoc->routes = routeList;
+    gdoc->tracks = trackList;
+
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+
+    return(gdoc);
+
 }
 
-bool writeGPX(GPXdoc* doc, char* fileName) {
-    return FALSE; 
+bool writeGPXdoc(GPXdoc* doc, char* fileName) {
+    if (doc == NULL || fileName == NULL) {
+        return false;
+    }
+
+
+    xmlDocPtr xDoc;
+    int i;
+    xDoc = GPXdocToXmlDoc(doc);
+    i = xmlSaveFormatFileEnc(fileName, xDoc, "UTF-8", 1);
+
+    xmlFreeDoc(xDoc);
+
+    if (i == -1) {
+        return false;
+    }
+
+    return true;
+
 }
 
 bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
-    return FALSE;
+
+    if (doc == NULL || gpxSchemaFile == NULL) {
+        return false;
+    }
+
+    ListIterator gpxDataIterator;
+    ListIterator waypointIterator;
+    ListIterator routeIterator;
+    ListIterator trackSegmentIterator;
+    ListIterator trackIterator;
+
+    GPXData* tempGPXData;
+    Waypoint* tempWaypoint;
+    Route* tempRoute;
+    TrackSegment* tempTrackSegment;
+    Track* tempTrack;
+
+    bool validFile = true;
+
+    xmlDocPtr xDoc;
+    xDoc = GPXdocToXmlDoc(doc);
+
+    if (validateXML(xDoc, gpxSchemaFile) == false) {
+        validFile = false;
+    }
+
+    if (doc->creator == NULL) {
+        validFile = false;
+    }
+
+    if (strcmp(doc->namespace, "") == 0) {
+        validFile = false;
+    }
+
+    if (doc->waypoints == NULL ||doc->routes == NULL ||doc->tracks == NULL) {
+        validFile = false;
+    }
+
+    waypointIterator = createIterator(doc->waypoints);
+    for(tempWaypoint = nextElement(&waypointIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&waypointIterator)) {
+        if (tempWaypoint->name == NULL) {
+            validFile = false;
+        }
+
+        gpxDataIterator = createIterator(tempWaypoint->otherData);
+        for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
+            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+                validFile = false;
+            }
+        }
+
+    }
+
+    routeIterator = createIterator(doc->routes);
+    for(tempRoute = nextElement(&routeIterator); tempRoute != NULL; tempRoute = nextElement(&routeIterator)) {
+
+        if (tempRoute->name == NULL) {
+            validFile = false;
+        }
+
+        waypointIterator = createIterator(tempRoute->waypoints);
+        for(tempWaypoint = nextElement(&waypointIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&waypointIterator)) {
+            if (tempWaypoint->name == NULL) {
+                validFile = false;
+            }
+
+            gpxDataIterator = createIterator(tempWaypoint->otherData);
+            for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
+                if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+                    validFile = false;
+                }
+            }
+
+        }
+
+        gpxDataIterator = createIterator(tempRoute->otherData);
+        for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
+            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+                validFile = false;
+            }
+        }
+
+        
+    }
+
+
+    trackIterator = createIterator(doc->tracks);
+    for (tempTrack = nextElement(&trackIterator); tempTrack != NULL; tempTrack = nextElement(&trackIterator)) {
+        if (tempTrack->name == NULL) {
+            validFile = false;
+        }
+
+
+        trackSegmentIterator = createIterator(tempTrack->segments);
+        for(tempTrackSegment = nextElement(&trackSegmentIterator); tempTrackSegment != NULL; tempTrackSegment = nextElement(&trackSegmentIterator)) {
+            waypointIterator = createIterator(tempTrackSegment->waypoints);
+            for(tempWaypoint = nextElement(&waypointIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&waypointIterator)) {
+                if (tempWaypoint->name == NULL) {
+                    validFile = false;
+                }
+
+                gpxDataIterator = createIterator(tempWaypoint->otherData);
+                for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
+                    if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+                        validFile = false;
+                    }
+                }
+            }
+        }
+
+        gpxDataIterator = createIterator(tempTrack->otherData);
+        for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
+            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+                validFile = false;
+            }
+        }
+
+    }
+
+
+    if (validFile == false) {
+        xmlFreeDoc(xDoc);
+        return false;
+    }
+
+    return true;
+  
 }
 
 
