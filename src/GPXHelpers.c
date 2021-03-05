@@ -427,8 +427,8 @@ void createxmlWaypoint(Waypoint* tempWaypoint, xmlNodePtr root_node, char* wayPo
     GPXData* tempGPXData;
 
 
-    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST wayPointType);
-    xmlAddChild(root_node, node);
+    xmlNodePtr node = xmlNewChild(root_node, NULL, BAD_CAST wayPointType, NULL);
+    //xmlAddChild(root_node, node);
 
     char* positionTemp = malloc(256);
     sprintf(positionTemp, "%.6f", tempWaypoint->latitude);
@@ -452,8 +452,8 @@ void createxmlRoute(Route* tempRoute, xmlNodePtr root_node, char* wayPointType, 
     GPXData* tempGPXData;
     Waypoint* tempWaypoint;
 
-    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST routeType);
-    xmlAddChild(root_node, node);
+    xmlNodePtr node = xmlNewChild(root_node, NULL, BAD_CAST routeType, NULL);
+    //xmlAddChild(root_node, node);
 
     if (strcmp(tempRoute->name, "") != 0) {
         xmlNewChild(node, NULL, BAD_CAST "name", BAD_CAST tempRoute->name);
@@ -477,8 +477,8 @@ void createxmlTrack(Track* tempTrack, xmlNodePtr root_node, char* wayPointType, 
     TrackSegment* tempTrackSegment;
     GPXData* tempGPXData;
 
-    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST "trk");
-    xmlAddChild(root_node, node);
+    xmlNodePtr node = xmlNewChild(root_node, NULL, BAD_CAST "trk", NULL);
+    //xmlAddChild(root_node, node);
 
     if (strcmp(tempTrack->name, "") != 0) {
         xmlNewChild(node, NULL, BAD_CAST "name", BAD_CAST tempTrack->name);
@@ -500,8 +500,8 @@ void createxmlTrackSegment(TrackSegment* tempTrackSegment, xmlNodePtr root_node,
     ListIterator tempIterator;
     Waypoint* tempWaypoint;
 
-    xmlNodePtr node = xmlNewNode(NULL, BAD_CAST "trkseg");
-    xmlAddChild(root_node, node);
+    xmlNodePtr node = xmlNewChild(root_node, NULL, BAD_CAST "trkseg", NULL);
+    //xmlAddChild(root_node, node);
 
     tempIterator = createIterator(tempTrackSegment->waypoints);
     for(tempWaypoint = nextElement(&tempIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&tempIterator)) {
@@ -534,6 +534,8 @@ bool validateXML(xmlDoc* doc, char* xsd) {
     xmlSchemaFree(schema);
     xmlSchemaCleanupTypes();
     xmlCleanupParser();
+
+    //printf("Ret is %d\n", ret);
 
     if (ret == 0) {
         return true;
