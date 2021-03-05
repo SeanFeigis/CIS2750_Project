@@ -220,32 +220,35 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
     xmlDocPtr xDoc;
     xDoc = GPXdocToXmlDoc(doc);
 
-    if (validateXML(xDoc, gpxSchemaFile) == false) {
-        validFile = false;
-    }
+    
 
     if (doc->creator == NULL) {
         validFile = false;
+        //printf("A\n");
     }
 
     if (strcmp(doc->namespace, "") == 0) {
         validFile = false;
+        //printf("B\n");
     }
 
     if (doc->waypoints == NULL ||doc->routes == NULL ||doc->tracks == NULL) {
         validFile = false;
+        //printf("C\n");
     }
 
     waypointIterator = createIterator(doc->waypoints);
     for(tempWaypoint = nextElement(&waypointIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&waypointIterator)) {
         if (tempWaypoint->name == NULL) {
             validFile = false;
+            //printf("D\n");
         }
 
         gpxDataIterator = createIterator(tempWaypoint->otherData);
         for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
-            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "") == 0) {
                 validFile = false;
+                //printf("E\n");
             }
         }
 
@@ -256,18 +259,21 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
 
         if (tempRoute->name == NULL) {
             validFile = false;
+            //printf("F\n");
         }
 
         waypointIterator = createIterator(tempRoute->waypoints);
         for(tempWaypoint = nextElement(&waypointIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&waypointIterator)) {
             if (tempWaypoint->name == NULL) {
                 validFile = false;
+                //printf("G\n");
             }
 
             gpxDataIterator = createIterator(tempWaypoint->otherData);
             for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
-                if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+                if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "") == 0) {
                     validFile = false;
+                   // printf("H\n");
                 }
             }
 
@@ -275,8 +281,10 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
 
         gpxDataIterator = createIterator(tempRoute->otherData);
         for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
-            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "") == 0) {
                 validFile = false;
+                //printf("The name and value: %s, %s",tempGPXData->name, tempGPXData->value );
+                //printf("I\n");
             }
         }
 
@@ -301,7 +309,7 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
 
                 gpxDataIterator = createIterator(tempWaypoint->otherData);
                 for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
-                    if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+                    if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "") == 0) {
                         validFile = false;
                     }
                 }
@@ -310,16 +318,23 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
 
         gpxDataIterator = createIterator(tempTrack->otherData);
         for (tempGPXData = nextElement(&gpxDataIterator); tempGPXData != NULL; tempGPXData = nextElement(&gpxDataIterator)) {
-            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "")) {
+            if (strcmp(tempGPXData->name, "") == 0 || strcmp(tempGPXData->value, "") == 0) {
                 validFile = false;
+                //printf("The name and value: %s, %s",tempGPXData->name, tempGPXData->value );
             }
         }
 
     }
 
+    if (validateXML(xDoc, gpxSchemaFile) == false) {
+        validFile = false;
+        printf("Validation failed inside validateGPX\n");
+    }
+    
+    xmlFreeDoc(xDoc);
 
     if (validFile == false) {
-        xmlFreeDoc(xDoc);
+        
         return false;
     }
 
