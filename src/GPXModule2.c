@@ -9,8 +9,8 @@ void dummyDeleteTrack(void* data);
 
 float round10(float len) {
 
-    int num1;
-    int lastDigit;
+    int num1 = 0;
+    int lastDigit = 0;
 
     
     num1 = (int) len;
@@ -31,7 +31,7 @@ float getRouteLen(const Route *rt) {
     if (rt == NULL) {
         return 0;
     }
-    float distanceSum;
+    float distanceSum = 0;
     float lat1,lon1,lat2,lon2;
     int r = 6371000;
     Waypoint* tempWaypoint;
@@ -39,19 +39,17 @@ float getRouteLen(const Route *rt) {
     
     waypointIterator = createIterator(rt->waypoints);
     tempWaypoint = nextElement(&waypointIterator);
-    lat1 = tempWaypoint->latitude;
-    lon1 = tempWaypoint->longitude;
+    lat1 = tempWaypoint->latitude * M_PI / 180;
+    lon1 = tempWaypoint->longitude * M_PI / 180;
     for(tempWaypoint = nextElement(&waypointIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&waypointIterator)) {
-        lat2 = tempWaypoint->latitude;
-        lon2 = tempWaypoint->longitude;
+        lat2 = tempWaypoint->latitude * M_PI / 180;
+        lon2 = tempWaypoint->longitude * M_PI / 180;
         distanceSum += 2 * r * asin(sqrt(pow(sin((lat2 - lat1)/2),2)+ cos(lat1)*cos(lat2)*pow(sin((lon2 - lon1)/2),2))); 
         //printf("The current sum is %f\n", distanceSum);
         lat1 = lat2;
         lon1 = lon2;
     }
     
-    distanceSum = distanceSum * M_PI / 180; 
-
     return(distanceSum);
 
 }
@@ -61,7 +59,7 @@ float getTrackLen(const Track *tr) {
     if (tr == NULL) {
         return 0;
     }
-    float distanceSum;
+    float distanceSum = 0;
     ListIterator trackSegmentIterator;
     ListIterator waypointIterator;
     TrackSegment* tempTrackSegment;
@@ -76,16 +74,16 @@ float getTrackLen(const Track *tr) {
         tempWaypoint = nextElement(&waypointIterator);
 
         if (i > 0) {
-            lat2 = tempWaypoint->latitude;
-            lon2 = tempWaypoint->longitude;
+            lat2 = tempWaypoint->latitude  * M_PI / 180;
+            lon2 = tempWaypoint->longitude  * M_PI / 180;
             distanceSum += 2 * r * asin(sqrt(pow(sin((lat2 - lat1)/2),2)+ cos(lat1)*cos(lat2)*pow(sin((lon2 - lon1)/2),2)));
         }
 
-        lat1 = tempWaypoint->latitude;
-        lon1 = tempWaypoint->longitude;
+        lat1 = tempWaypoint->latitude  * M_PI / 180;
+        lon1 = tempWaypoint->longitude  * M_PI / 180;
         for(tempWaypoint = nextElement(&waypointIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&waypointIterator)) {
-            lat2 = tempWaypoint->latitude;
-            lon2 = tempWaypoint->longitude;
+            lat2 = tempWaypoint->latitude  * M_PI / 180;
+            lon2 = tempWaypoint->longitude  * M_PI / 180;
             distanceSum += 2 * r * asin(sqrt(pow(sin((lat2 - lat1)/2),2)+ cos(lat1)*cos(lat2)*pow(sin((lon2 - lon1)/2),2))); 
             //printf("The current sum is %f\n", distanceSum);
             lat1 = lat2;
@@ -95,8 +93,6 @@ float getTrackLen(const Track *tr) {
         
         i++;
     }
-
-    distanceSum = distanceSum * M_PI / 180; 
 
     return distanceSum;
 }
@@ -156,13 +152,13 @@ bool isLoopRoute(const Route* route, float delta) {
 
     tempWaypoint = getFromFront(route->waypoints);
 
-    lat1 = tempWaypoint->latitude;
-    lon1 = tempWaypoint->longitude;
+    lat1 = tempWaypoint->latitude  * M_PI / 180;
+    lon1 = tempWaypoint->longitude  * M_PI / 180;
 
     tempWaypoint = getFromBack(route->waypoints);
 
-    lat2 = tempWaypoint->latitude;
-    lon2 = tempWaypoint->longitude;
+    lat2 = tempWaypoint->latitude  * M_PI / 180;
+    lon2 = tempWaypoint->longitude  * M_PI / 180;
 
     distance = 2 * r * asin(sqrt(pow(sin((lat2 - lat1)/2),2)+ cos(lat1)*cos(lat2)*pow(sin((lon2 - lon1)/2),2))); 
 
@@ -197,14 +193,14 @@ bool isLoopTrack(const Track *tr, float delta) {
     tempTrackSegment = getFromFront(tr->segments);
     tempWaypoint = getFromFront(tempTrackSegment->waypoints);
 
-    lat1 = tempWaypoint->latitude;
-    lon1 = tempWaypoint->longitude;
+    lat1 = tempWaypoint->latitude  * M_PI / 180;
+    lon1 = tempWaypoint->longitude  * M_PI / 180;
 
     tempTrackSegment = getFromBack(tr->segments);
     tempWaypoint = getFromBack(tempTrackSegment->waypoints);
 
-    lat2 = tempWaypoint->latitude;
-    lon2 = tempWaypoint->longitude;
+    lat2 = tempWaypoint->latitude  * M_PI / 180;
+    lon2 = tempWaypoint->longitude  * M_PI / 180;
 
     
     distance = 2 * r * asin(sqrt(pow(sin((lat2 - lat1)/2),2)+ cos(lat1)*cos(lat2)*pow(sin((lon2 - lon1)/2),2))); 
@@ -219,34 +215,47 @@ bool isLoopTrack(const Track *tr, float delta) {
 
 List* getRoutesBetween(const GPXdoc* doc, float sourceLat, float sourceLong, float destLat, float destLong, float delta) {
     if (doc == NULL || delta < 0) {
-        return false;
+        return NULL;
     }
     Waypoint* tempWaypoint;
     List* routeList;
     ListIterator routeIterator;
     Route* tempRoute;
-    int lat1,lat2,lon1,lon2;
+    int lat1,lon1;
     float distance = 0;
+    float distance2 = 0;
     int r = 6371000;
 
+    /*
+    sourceLat = sourceLat * M_PI /180;
+    sourceLong = sourceLong * M_PI /180;
+    destLat = destLat * M_PI /180;
+    destLong = destLong * M_PI /180;
+    */
     routeList = initializeList(&routeToString, &dummyDeleteRoute, &compareRoutes);
 
     routeIterator = createIterator(doc->routes);
     for(tempRoute = nextElement(&routeIterator); tempRoute != NULL; tempRoute = nextElement(&routeIterator)) {
         tempWaypoint = getFromFront(tempRoute->waypoints);
-        lat1 = tempWaypoint->latitude;
-        lon1 = tempWaypoint->longitude;
+        lat1 = tempWaypoint->latitude  * M_PI / 180;
+        lon1 = tempWaypoint->longitude  * M_PI / 180;
 
-        tempWaypoint = getFromFront(tempRoute->waypoints);
-        lat2 = tempWaypoint->latitude;
-        lon2 = tempWaypoint->longitude;
+        distance = 2 * r * asin(sqrt(pow(sin((sourceLat - lat1)/2),2)+ cos(lat1)*cos(sourceLat)*pow(sin((sourceLong - lon1)/2),2)));
 
-        distance = 2 * r * asin(sqrt(pow(sin((lat2 - lat1)/2),2)+ cos(lat1)*cos(lat2)*pow(sin((lon2 - lon1)/2),2))); 
+        tempWaypoint = getFromBack(tempRoute->waypoints);
+        lat1 = tempWaypoint->latitude  * M_PI / 180;
+        lon1 = tempWaypoint->longitude  * M_PI / 180;
 
-        if (distance < delta) {
+        distance2 = 2 * r * asin(sqrt(pow(sin((destLat - lat1)/2),2)+ cos(lat1)*cos(destLat)*pow(sin((destLong - lon1)/2),2))); 
+        printf("Delta: %f,  Distance1: %f, Distance2: %f\n", delta, distance, distance2);
+        if (distance < delta && distance2 < delta) {
             insertBack(routeList, tempRoute);
         }
 
+    }
+
+    if (getLength(routeList) == 0) {
+        return NULL;
     }
 
     return(routeList);
@@ -268,16 +277,22 @@ void dummyDeleteRoute(void* data) {
 
 List* getTracksBetween(const GPXdoc* doc, float sourceLat, float sourceLong, float destLat, float destLong, float delta) {
     if (doc == NULL || delta < 0) {
-        return false;
+        return NULL;
     }
     List* trackList;
     ListIterator trackIterator;
     Track* tempTrack;
     Waypoint* tempWaypoint;
     TrackSegment* tempTrackSegment;
-    int lat1,lat2,lon1,lon2;
+    int lat1,lon1;
     float distance = 0;
+    float distance2 = 0;
     int r = 6371000;
+
+    sourceLat = sourceLat * M_PI /180;
+    sourceLong = sourceLong * M_PI /180;
+    destLat = destLat * M_PI /180;
+    destLong = destLong * M_PI /180;
     
     trackList = initializeList(&trackToString, &dummyDeleteTrack, &compareTracks);
 
@@ -286,21 +301,27 @@ List* getTracksBetween(const GPXdoc* doc, float sourceLat, float sourceLong, flo
         tempTrackSegment = getFromFront(tempTrack->segments);
         tempWaypoint = getFromFront(tempTrackSegment->waypoints);
 
-        lat1 = tempWaypoint->latitude;
-        lon1 = tempWaypoint->longitude;
+        lat1 = tempWaypoint->latitude  * M_PI / 180;
+        lon1 = tempWaypoint->longitude  * M_PI / 180;
+
+        distance = 2 * r * asin(sqrt(pow(sin((sourceLat- lat1)/2),2)+ cos(lat1)*cos(sourceLat)*pow(sin((sourceLong - lon1)/2),2))); 
 
         tempTrackSegment = getFromBack(tempTrack->segments);
         tempWaypoint = getFromBack(tempTrackSegment->waypoints);
 
-        lat2 = tempWaypoint->latitude;
-        lon2 = tempWaypoint->longitude;
+        lat1 = tempWaypoint->latitude  * M_PI / 180;
+        lat1 = tempWaypoint->longitude  * M_PI / 180;
 
-        distance = 2 * r * asin(sqrt(pow(sin((lat2 - lat1)/2),2)+ cos(lat1)*cos(lat2)*pow(sin((lon2 - lon1)/2),2))); 
+        distance2 = 2 * r * asin(sqrt(pow(sin((destLat - lat1)/2),2)+ cos(lat1)*cos(destLat)*pow(sin((destLong - lon1)/2),2))); 
 
-        if (distance < delta) {
+        if (distance < delta && distance2 < delta) {
             insertBack(trackList, tempTrack);
         }
 
+    }
+
+    if (getLength(trackList) == 0) {
+        return NULL;
     }
 
     return(trackList);
@@ -319,7 +340,33 @@ void dummyDeleteTrack(void* data) {
 }
 
 char* trackToJSON(const Track *tr) {
-    return(NULL);
+    if (tr == NULL) {
+        return "{}";
+    }
+
+    char* strn;
+    strn = (char*) malloc(256);
+
+    char* tempName = (char*) malloc(256);
+    if (strcmp(tr->name, "")==0 ) {
+        strcpy(tempName, "None");
+    } else {
+        strcpy(tempName, tr->name);
+    }
+
+    char* tempBool = (char*) malloc(6);
+    if (isLoopTrack(tr, 10.0)) {
+        strcpy(tempBool, "true");
+    } else {
+        strcpy(tempBool, "false");
+    }
+
+    sprintf(strn, "{\"name\":\"%s\",\"len\":%.1f,\"loop\":%s}", tempName, round10(getTrackLen(tr)), tempBool);
+
+    free(tempName);
+    free(tempBool);
+
+    return(strn);
 }
 
 char* routeToJSON(const Route *rt) {
@@ -344,7 +391,7 @@ char* routeToJSON(const Route *rt) {
         strcpy(tempBool, "false");
     }
 
-    sprintf(strn, "{name\":\"%s\",\"numPoints\":%d,\"len\":%f,\"loop\":%s}", tempName, getLength(rt->waypoints), round10(getRouteLen(rt)), tempBool);
+    sprintf(strn, "{\"name\":\"%s\",\"numPoints\":%d,\"len\":%.1f,\"loop\":%s}", tempName, getLength(rt->waypoints), round10(getRouteLen(rt)), tempBool);
 
     free(tempName);
     free(tempBool);
@@ -386,16 +433,72 @@ char* routeListToJSON(const List *list) {
 }
 
 char* trackListToJSON(const List *list) {
-    return NULL;
+    if (list == NULL ) {
+        return "[]";
+    }
+
+    if (getLength((List*) list) == 0) {
+        return "[]";
+    }
+    int i = 0;
+    ListIterator trackIterator;
+    Track* tempTrack;
+    char* strn;
+    strn = (char*) malloc(2048);
+
+    strcpy(strn, "[");
+
+    char* trktJSONchar;
+    trackIterator = createIterator((List*) list);
+    for(tempTrack = nextElement(&trackIterator); tempTrack != NULL; tempTrack = nextElement(&trackIterator)) {
+        if (i > 0) {
+            strcat(strn, ",");
+        }
+        trktJSONchar = trackToJSON(tempTrack);
+        strcat(strn, trktJSONchar);
+        free(trktJSONchar);
+        i++;
+    }
+
+    strcat(strn, "]");
+
+    return(strn);
 }
 
 char* GPXtoJSON(const GPXdoc* gpx) {
-    return NULL;
+    if (gpx == NULL) {
+        return "{}";
+    }
+
+    char* strn;
+    strn = (char*) malloc(2048);
+
+    sprintf(strn, "{\"version\":%.1f,\"creator\":\"%s\",\"numWaypoints\":%d,\"numRoutes\":%d,\"numTracks\":%d}",
+        gpx->version, gpx->creator, getLength(gpx->waypoints), getLength(gpx->routes) , getLength(gpx->tracks));
+
+
+    return strn;
 }
 
 
+void addWaypoint(Route *rt, Waypoint *pt) {
 
+}
 
+void addRoute(GPXdoc* doc, Route* rt) {
 
+}
+
+GPXdoc* JSONtoGPX(const char* gpxString) {
+    return NULL;
+}
+
+Waypoint* JSONtoWaypoint(const char* gpxString) {
+    return NULL;
+}
+
+Route* JSONtoRoute(const char* gpxString) {
+    return NULL;
+}
 
 
