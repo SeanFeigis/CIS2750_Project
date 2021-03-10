@@ -2,7 +2,7 @@
 #include "LinkedListAPI.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 
 void dummyDeleteRoute(void* data);
 void dummyDeleteTrack(void* data);
@@ -499,41 +499,94 @@ GPXdoc* JSONtoGPX(const char* gpxString) {
     if  (gpxString == NULL) {
         return NULL;
     }
-    /*
+    
     GPXdoc* doc = malloc(sizeof(GPXdoc));
-
     strcpy(doc->namespace, "http://www.topografix.com/GPX/1/1");
 
+    char* commaChar1;
+    char* commaChar2;
+    char* colonChar;
 
 
-    return NULL;
-    */
+    commaChar1 = strtok((char*)gpxString, ",");
+    commaChar2 = strtok(NULL, ",");
+
+    colonChar = strtok(commaChar1, ":");
+    colonChar = strtok(NULL, ":");
+
+    doc->version = atof(colonChar);
+
+    colonChar = strtok(commaChar2, ":");
+    colonChar = strtok(NULL, ":");
+    colonChar = strtok(colonChar, "\"");
+
+    doc->creator = malloc(strlen(colonChar)+1);
+    strcpy(doc->creator, colonChar);
+
+    doc->waypoints = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
+    doc->routes = initializeList(&routeToString, &deleteRoute, &compareRoutes);
+    doc->tracks = initializeList(&trackToString, &deleteTrack, &compareTracks);
+
+    return doc;
+    
 }
 
 Waypoint* JSONtoWaypoint(const char* gpxString) {
-    return NULL;
+    if (gpxString == NULL) {
+        return NULL;
+    }
+
+    Waypoint* tempWaypoint = malloc(sizeof(Waypoint));
+    double lat,lon;
+    char* commaChar1;
+    char* commaChar2;
+    char* colonChar;
+
+
+    commaChar1 = strtok((char*)gpxString, ",");
+    commaChar2 = strtok(NULL, ",");
+
+    colonChar = strtok(commaChar1, ":");
+    colonChar = strtok(NULL, ":");
+
+    lat = atof(colonChar);
+
+    colonChar = strtok(commaChar2, ":");
+    colonChar = strtok(NULL, ":");
+
+    lon = atof(colonChar);
+
+
+    tempWaypoint->latitude = lat;
+    tempWaypoint->longitude = lon; 
+    tempWaypoint->name = malloc(2);
+    tempWaypoint->name[0] = '\0';
+    tempWaypoint->otherData = initializeList(&gpxDataToString, &deleteGpxData, &compareGpxData);
+    
+    return tempWaypoint;
 }
 
 Route* JSONtoRoute(const char* gpxString) {
     if (gpxString == NULL) {
         return NULL;
     }
-    /*
-    char* nameTemp = NULL;
-    
-    long int num;
-    char* charLoc, *charLoc2;
-    
-    charLoc = gpxString[8];
-    charLoc2 = strrchr(gpxString, '\"');
-    num = charLoc2-charLoc;
-    
 
-    strncpy(nameTemp, gpxString + 8, num);
+    Route* tempRoute = malloc(sizeof(Route));
+    
+    char* delimChar;
 
-    printf(nameTemp);
-    */
-    return NULL;
+    delimChar = strtok((char*)gpxString, ":");
+    delimChar = strtok(NULL, ":");
+
+    delimChar = strtok(delimChar, "\"");
+
+    tempRoute->name = malloc(strlen(delimChar)+1);
+    strcpy(tempRoute->name, delimChar);
+
+    tempRoute->waypoints = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
+    tempRoute->otherData = initializeList(&gpxDataToString, &deleteGpxData, &compareGpxData);
+
+    return tempRoute;
 }
 
 

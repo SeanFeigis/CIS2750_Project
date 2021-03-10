@@ -2,7 +2,7 @@
 #include "LinkedListAPI.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 
 TrackSegment* createTrackSegment(xmlNode* node);
 void createxmlWaypoint(Waypoint* tempWaypoint, xmlNodePtr root_node, char* wayPointType);
