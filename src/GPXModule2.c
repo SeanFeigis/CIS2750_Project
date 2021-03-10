@@ -141,7 +141,7 @@ bool isLoopRoute(const Route* route, float delta) {
     if (route == NULL || delta < 0) {
         return false;
     }
-    int lat1,lat2,lon1,lon2;
+    float lat1,lat2,lon1,lon2;
     Waypoint* tempWaypoint;
     float distance = 0;
     int r = 6371000;
@@ -175,7 +175,7 @@ bool isLoopTrack(const Track *tr, float delta) {
     }
     ListIterator trackSegmentIterator;
     TrackSegment* tempTrackSegment;
-    int lat1,lat2,lon1,lon2;
+    float lat1,lat2,lon1,lon2;
     Waypoint* tempWaypoint;
     float distance = 0;
     int r = 6371000;
@@ -221,17 +221,17 @@ List* getRoutesBetween(const GPXdoc* doc, float sourceLat, float sourceLong, flo
     List* routeList;
     ListIterator routeIterator;
     Route* tempRoute;
-    int lat1,lon1;
+    float lat1,lon1;
     float distance = 0;
     float distance2 = 0;
     int r = 6371000;
 
-    /*
+    
     sourceLat = sourceLat * M_PI /180;
     sourceLong = sourceLong * M_PI /180;
     destLat = destLat * M_PI /180;
     destLong = destLong * M_PI /180;
-    */
+    
     routeList = initializeList(&routeToString, &dummyDeleteRoute, &compareRoutes);
 
     routeIterator = createIterator(doc->routes);
@@ -239,7 +239,7 @@ List* getRoutesBetween(const GPXdoc* doc, float sourceLat, float sourceLong, flo
         tempWaypoint = getFromFront(tempRoute->waypoints);
         lat1 = tempWaypoint->latitude  * M_PI / 180;
         lon1 = tempWaypoint->longitude  * M_PI / 180;
-
+       // printf("Lat1: %f, Lon1: %f\n", lat1, lon1);
         distance = 2 * r * asin(sqrt(pow(sin((sourceLat - lat1)/2),2)+ cos(lat1)*cos(sourceLat)*pow(sin((sourceLong - lon1)/2),2)));
 
         tempWaypoint = getFromBack(tempRoute->waypoints);
@@ -247,7 +247,7 @@ List* getRoutesBetween(const GPXdoc* doc, float sourceLat, float sourceLong, flo
         lon1 = tempWaypoint->longitude  * M_PI / 180;
 
         distance2 = 2 * r * asin(sqrt(pow(sin((destLat - lat1)/2),2)+ cos(lat1)*cos(destLat)*pow(sin((destLong - lon1)/2),2))); 
-        printf("Delta: %f,  Distance1: %f, Distance2: %f\n", delta, distance, distance2);
+        //printf("Delta: %f,  Distance1: %f, Distance2: %f\n", delta, distance, distance2);
         if (distance < delta && distance2 < delta) {
             insertBack(routeList, tempRoute);
         }
@@ -284,7 +284,7 @@ List* getTracksBetween(const GPXdoc* doc, float sourceLat, float sourceLong, flo
     Track* tempTrack;
     Waypoint* tempWaypoint;
     TrackSegment* tempTrackSegment;
-    int lat1,lon1;
+    float lat1,lon1;
     float distance = 0;
     float distance2 = 0;
     int r = 6371000;
@@ -482,15 +482,32 @@ char* GPXtoJSON(const GPXdoc* gpx) {
 
 
 void addWaypoint(Route *rt, Waypoint *pt) {
-
+    if (rt == NULL || pt == NULL) {
+        return;
+    }
+    insertBack(rt->waypoints, pt);
 }
 
 void addRoute(GPXdoc* doc, Route* rt) {
-
+    if (doc == NULL || rt == NULL) {
+        return;
+    } 
+    insertBack(doc->routes, rt);
 }
 
 GPXdoc* JSONtoGPX(const char* gpxString) {
+    if  (gpxString == NULL) {
+        return NULL;
+    }
+    /*
+    GPXdoc* doc = malloc(sizeof(GPXdoc));
+
+    strcpy(doc->namespace, "http://www.topografix.com/GPX/1/1");
+
+
+
     return NULL;
+    */
 }
 
 Waypoint* JSONtoWaypoint(const char* gpxString) {
@@ -498,6 +515,24 @@ Waypoint* JSONtoWaypoint(const char* gpxString) {
 }
 
 Route* JSONtoRoute(const char* gpxString) {
+    if (gpxString == NULL) {
+        return NULL;
+    }
+    /*
+    char* nameTemp = NULL;
+    
+    long int num;
+    char* charLoc, *charLoc2;
+    
+    charLoc = gpxString[8];
+    charLoc2 = strrchr(gpxString, '\"');
+    num = charLoc2-charLoc;
+    
+
+    strncpy(nameTemp, gpxString + 8, num);
+
+    printf(nameTemp);
+    */
     return NULL;
 }
 
