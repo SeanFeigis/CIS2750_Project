@@ -95,17 +95,20 @@ GPXdoc* createGPXdoc(char* fileName) {
 
 GPXdoc* createValidGPXdoc(char* fileName, char* gpxSchemaFile) {
 
-    
-    xmlDoc *doc = NULL;
-    xmlNode *root_element = NULL;
-
     if (fileName == NULL || gpxSchemaFile == NULL) {
         return(NULL);
     }
+    
+    xmlDoc *doc = NULL;
+    xmlNode *root_element = NULL;  
   
     LIBXML_TEST_VERSION
 
     doc = xmlReadFile(fileName, NULL, 0);
+
+    if (doc == NULL) {
+        return NULL;
+    }
 
     if (validateXML(doc, gpxSchemaFile) == false) {
         free(doc);
@@ -220,8 +223,6 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
     xmlDocPtr xDoc;
     xDoc = GPXdocToXmlDoc(doc);
 
-    
-
     if (doc->creator == NULL) {
         validFile = false;
         //printf("A\n");
@@ -328,7 +329,7 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
 
     if (validateXML(xDoc, gpxSchemaFile) == false) {
         validFile = false;
-        printf("Validation failed inside validateGPX\n");
+        //printf("Validation failed inside validateGPX\n");
     }
     
     xmlFreeDoc(xDoc);
