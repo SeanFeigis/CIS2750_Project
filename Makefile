@@ -49,10 +49,10 @@ $(BIN)StructListDemo.o: $(SRC)StructListDemo.c
 
 ###################################################################################################
 
-test: $(BIN)testMain.o $(BIN)libgpxparser.so $(BIN)GPXParser.o $(BIN)GPXHelpers.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -I$(XML_PATH) -I$(INC) -L$(BIN) -o $(BIN)testMain $(BIN)testMain.o $(BIN)GPXParser.o $(BIN)GPXHelpers.o $(BIN)LinkedListAPI.o -lxml2 
+test: $(BIN)testMain.o $(BIN)libgpxparser.so $(BIN)GPXParser.o $(BIN)GPXHelpers.o $(BIN)GPXModule2.o 
+	$(CC) $(CFLAGS) $(LDFLAGS) -I$(XML_PATH) -I$(INC) -L$(BIN) -o $(BIN)testMain $(BIN)testMain.o $(BIN)GPXParser.o $(BIN)GPXHelpers.o $(BIN)GPXModule2.o $(BIN)LinkedListAPI.o -lxml2 -lm 
 
-$(BIN)testMain.o: $(SRC)testMain.c $(BIN)GPXParser.o $(BIN)GPXHelpers.o
+$(BIN)testMain.o: $(SRC)testMain.c $(BIN)GPXParser.o $(BIN)GPXHelpers.o $(BIN)GPXModule2.o
 	$(CC) $(CFLAGS) -I$(XML_PATH) -I$(INC) -c $(SRC)testMain.c -o $(BIN)testMain.o -lxml2
 
 all: parser test
