@@ -340,11 +340,14 @@ void dummyDeleteTrack(void* data) {
 }
 
 char* trackToJSON(const Track *tr) {
+    char* strn;
+
     if (tr == NULL) {
-        return "{}";
+        strn = malloc(3);
+        strcpy(strn, "{}");
+        return strn;
     }
 
-    char* strn;
     strn = (char*) malloc(256);
 
     char* tempName = (char*) malloc(256);
@@ -370,11 +373,14 @@ char* trackToJSON(const Track *tr) {
 }
 
 char* routeToJSON(const Route *rt) {
+    char* strn;
+
     if (rt == NULL) {
-        return "{}";
+        strn = malloc(3);
+        strcpy(strn, "{}");
+        return strn;
     }
 
-    char* strn;
     strn = (char*) malloc(256);
 
     char* tempName = (char*) malloc(256);
@@ -400,17 +406,22 @@ char* routeToJSON(const Route *rt) {
 }
 
 char* routeListToJSON(const List *list) {
+    char* strn; 
+
     if (list == NULL ) {
-        return "[]";
+        strn = malloc(3);
+        strcpy(strn, "[]");
+        return strn;
     }
 
     if (getLength((List*) list) == 0) {
-        return "[]";
+        strn = malloc(3);
+        strcpy(strn, "[]");
+        return strn;
     }
     int i = 0;
     ListIterator routeIterator;
     Route* tempRoute;
-    char* strn;
     strn = (char*) malloc(2048);
 
     strcpy(strn, "[");
@@ -433,17 +444,22 @@ char* routeListToJSON(const List *list) {
 }
 
 char* trackListToJSON(const List *list) {
+    char* strn;
+
     if (list == NULL ) {
-        return "[]";
+        strn = malloc(3);
+        strcpy(strn, "[]");
+        return strn;
     }
 
     if (getLength((List*) list) == 0) {
-        return "[]";
+        strn = malloc(3);
+        strcpy(strn, "[]");
+        return strn;
     }
     int i = 0;
     ListIterator trackIterator;
     Track* tempTrack;
-    char* strn;
     strn = (char*) malloc(2048);
 
     strcpy(strn, "[");
@@ -466,11 +482,14 @@ char* trackListToJSON(const List *list) {
 }
 
 char* GPXtoJSON(const GPXdoc* gpx) {
+    char* strn;
+
     if (gpx == NULL) {
-        return "{}";
+        strn = malloc(3);
+        strcpy(strn, "{}");
+        return strn;
     }
 
-    char* strn;
     strn = (char*) malloc(2048);
 
     sprintf(strn, "{\"version\":%.1f,\"creator\":\"%s\",\"numWaypoints\":%d,\"numRoutes\":%d,\"numTracks\":%d}",
