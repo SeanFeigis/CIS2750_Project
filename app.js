@@ -70,14 +70,15 @@ app.get('/uploads/:name', function(req , res){
 });
 
 //******************** Your code goes here ******************** 
-
-let sharedLib = ffi.Library('./sharedLib', {
+/*
+let sharedLib = ffi.Library('./libgpxparser.so', {
+    /*
     'printFunc': [ 'void', [ ] ],		//return type first, argument list second
                                       //for void input type, leave argument list is empty
     'addTwo': [ 'int', [ 'int' ] ],	//int return, int argument
     'putDesc' : [ 'void', [ 'string' ] ],
-    'getDesc' : [ 'string', [] ]
-  });
+    'getDesc' : [ 'string', [] ] 
+}); */
 
 
 //Sample endpoint
@@ -89,7 +90,7 @@ app.get('/endpoint1', function(req , res){
     }
   );
 });
-
+/*
 app.get('/endpoint1', function(req , res){
     
     res.send(
@@ -100,6 +101,6 @@ app.get('/endpoint1', function(req , res){
       }
     );
   });
-
+*/
 app.listen(portNum);
 console.log('Running app at localhost: ' + portNum);
