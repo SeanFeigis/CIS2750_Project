@@ -73,7 +73,7 @@ app.get('/uploads/:name', function(req , res){
 
 let sharedLib = ffi.Library('./libgpxparser', {
 
-    'GPXFiletoJSON': [ 'string', ['string', 'string' ] ],		//return type first, argument list second
+    'GPXFiletoJSON' : [ 'string', ['string', 'string' ] ],		//return type first, argument list second
     //'addTwo': [ 'int', [ 'int' ] ],	//int return, int argument
     //'putDesc' : [ 'void', [ 'string' ] ],
     //'getDesc' : [ 'string', [] ] */
@@ -89,17 +89,14 @@ app.get('/endpoint1', function(req , res){
     }
   );
 });
-/*
-app.get('/endpoint1', function(req , res){
 
+app.get('/FileRetrieve', function(req , res){
     res.send(
       {
-
-
 
       }
     );
   });
-*/
+
 app.listen(portNum);
 console.log('Running app at localhost: ' + portNum);

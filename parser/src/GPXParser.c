@@ -15,7 +15,7 @@ GPXdoc* createGPXdoc(char* fileName) {
 
     xmlDoc *doc = NULL;
     xmlNode *root_element = NULL;
-  
+
     LIBXML_TEST_VERSION
 
     doc = xmlReadFile(fileName, NULL, 0);
@@ -32,7 +32,7 @@ GPXdoc* createGPXdoc(char* fileName) {
     GPXdoc* gdoc = malloc(sizeof(GPXdoc));
 
     root_element = xmlDocGetRootElement(doc);
-    
+
     gdoc->creator = NULL;
     gdoc->version = 0;
     gdoc->namespace[0] = '\0';
@@ -45,11 +45,11 @@ GPXdoc* createGPXdoc(char* fileName) {
     xmlAttr *attr;
 
     for (attr = cur_node->properties; attr != NULL; attr = attr->next) {
-        
+
         xmlNode *value = attr->children;
         char *attrName = (char *)attr->name;
         char *cont = (char *)(value->content);
-        
+
         if (strcmp(attrName, "version") == 0) {
             gdoc->version = strtod(cont, &cont);
         }
@@ -98,10 +98,10 @@ GPXdoc* createValidGPXdoc(char* fileName, char* gpxSchemaFile) {
     if (fileName == NULL || gpxSchemaFile == NULL) {
         return(NULL);
     }
-    
+
     xmlDoc *doc = NULL;
-    xmlNode *root_element = NULL;  
-  
+    xmlNode *root_element = NULL;
+
     LIBXML_TEST_VERSION
 
     doc = xmlReadFile(fileName, NULL, 0);
@@ -118,7 +118,7 @@ GPXdoc* createValidGPXdoc(char* fileName, char* gpxSchemaFile) {
     GPXdoc* gdoc = malloc(sizeof(GPXdoc));
 
     root_element = xmlDocGetRootElement(doc);
-    
+
     gdoc->creator = NULL;
     gdoc->version = 0;
     gdoc->namespace[0] = '\0';
@@ -131,11 +131,11 @@ GPXdoc* createValidGPXdoc(char* fileName, char* gpxSchemaFile) {
     xmlAttr *attr;
 
     for (attr = cur_node->properties; attr != NULL; attr = attr->next) {
-        
+
         xmlNode *value = attr->children;
         char *attrName = (char *)attr->name;
         char *cont = (char *)(value->content);
-        
+
         if (strcmp(attrName, "version") == 0) {
             gdoc->version = strtod(cont, &cont);
         }
@@ -289,7 +289,7 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
             }
         }
 
-        
+
     }
 
 
@@ -331,16 +331,16 @@ bool validateGPXDoc(GPXdoc* doc, char* gpxSchemaFile) {
         validFile = false;
         //printf("Validation failed inside validateGPX\n");
     }
-    
+
     xmlFreeDoc(xDoc);
 
     if (validFile == false) {
-        
+
         return false;
     }
 
     return true;
-  
+
 }
 
 
@@ -366,7 +366,7 @@ char* GPXdocToString(GPXdoc* doc) {
         return NULL;
     }
 
-    char* text; 
+    char* text;
     char* creatorTemp;
     char* versionTemp;
     char* namespaceTemp;
@@ -382,9 +382,9 @@ char* GPXdocToString(GPXdoc* doc) {
     namespaceTemp = malloc(256);
     sprintf(namespaceTemp, "The namespace is %s\n", doc->namespace);
     waypointTemp = toString(doc->waypoints);
-    routeTemp = toString(doc->routes); 
+    routeTemp = toString(doc->routes);
     trackTemp = toString(doc->tracks);
-    
+
 
     len = strlen(waypointTemp) + strlen(routeTemp) + strlen(creatorTemp) + strlen(versionTemp) + strlen(trackTemp) + strlen(namespaceTemp);
     text = malloc(len + 100);
@@ -417,7 +417,7 @@ int getNumWaypoints(const GPXdoc* doc) {
     }
 
     numWaypoints = getLength(doc->waypoints);
-    
+
     return(numWaypoints);
 }
 
@@ -456,13 +456,13 @@ int getNumSegments(const GPXdoc* doc) {
 
     int numSegments = 0;
     Track* tempTrack;
-    
+
     ListIterator tempIterator = createIterator(doc->tracks);
 
     for (tempTrack = nextElement(&tempIterator); tempTrack != NULL; tempTrack = nextElement(&tempIterator)) {
         numSegments+= getLength(tempTrack->segments);
     }
-    
+
     return(numSegments);
 
 }
@@ -518,7 +518,7 @@ int getNumGPXData(const GPXdoc* doc) {
     for (tempTrack = nextElement(&tempIterator); tempTrack != NULL; tempTrack = nextElement(&tempIterator)) {
         tempIterator2 = createIterator(tempTrack->segments);
         for(tempTrackSegment = nextElement(&tempIterator2); tempTrackSegment != NULL; tempTrackSegment = nextElement(&tempIterator2)) {
-            tempIterator3 = createIterator(tempTrackSegment->waypoints); 
+            tempIterator3 = createIterator(tempTrackSegment->waypoints);
             for(tempWaypoint = nextElement(&tempIterator3); tempWaypoint != NULL; tempWaypoint = nextElement(&tempIterator3)) {
                 numGPXData += getLength(tempWaypoint->otherData);
                 if (strcmp(tempWaypoint->name, "\0") != 0) {
@@ -536,7 +536,7 @@ int getNumGPXData(const GPXdoc* doc) {
     return(numGPXData);
 }
 
-// Function that returns a waypoint with the given name.  If more than one exists, return the first one.  
+// Function that returns a waypoint with the given name.  If more than one exists, return the first one.
 // Return NULL if the waypoint does not exist
 Waypoint* getWaypoint(const GPXdoc* doc, char* name) {
 
@@ -554,11 +554,11 @@ Waypoint* getWaypoint(const GPXdoc* doc, char* name) {
             return(tempWaypoint);
         }
     }
-    
+
     return(tempWaypoint);
 }
-// Function that returns a track with the given name.  If more than one exists, return the first one. 
-// Return NULL if the track does not exist 
+// Function that returns a track with the given name.  If more than one exists, return the first one.
+// Return NULL if the track does not exist
 Track* getTrack(const GPXdoc* doc, char* name) {
 
     if (doc == NULL || name == NULL) {
@@ -578,7 +578,7 @@ Track* getTrack(const GPXdoc* doc, char* name) {
 
     return(tempTrack);
 }
-// Function that returns a route with the given name.  If more than one exists, return the first one.  
+// Function that returns a route with the given name.  If more than one exists, return the first one.
 // Return NULL if the route does not exist
 Route* getRoute(const GPXdoc* doc, char* name) {
 
@@ -597,4 +597,14 @@ Route* getRoute(const GPXdoc* doc, char* name) {
         }
     }
     return(tempRoute);
+}
+
+
+char* GPXFiletoJSON(char* gpxFile, char* xsdFile) {
+  GPXdoc* doc = malloc(sizeof(GPXdoc));
+  doc = createValidGPXdoc(gpxFile, xsdFile);
+  char* string;
+  string = GPXtoJSON(doc);
+  deleteGPXdoc(doc);
+  return(string);
 }

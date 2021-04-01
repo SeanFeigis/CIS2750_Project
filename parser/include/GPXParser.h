@@ -17,7 +17,7 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-//Represents a generic GPX element/XML node - i.e. some sort of an additinal piece of data, 
+//Represents a generic GPX element/XML node - i.e. some sort of an additinal piece of data,
 // e.g. comment, elevation, desciption, etc..
 typedef struct  {
     //GPXData name.  Must not be an empty string.
@@ -25,7 +25,7 @@ typedef struct  {
 
     //GPXData value.  We use a C99 flexible array member, which we will discuss in class.
 	//Must not be an empty string
-	char	value[]; 
+	char	value[];
 } GPXData;
 
 typedef struct {
@@ -38,7 +38,7 @@ typedef struct {
     //Waypoint latitude.  Must be initialized.
     double latitude;
 
-    //Additional waypoint data - i.e. children of the GPX waypoint other than <name>.  
+    //Additional waypoint data - i.e. children of the GPX waypoint other than <name>.
     //We will assume that all waypoint children have no children of their own
     //This can be elevation, time, etc.. Note that while the element <name> can be a child of the waypoint node,
     //the name already has its own dedicated filed in the Waypoint sruct - so do not place the name in this list
@@ -54,7 +54,7 @@ typedef struct {
     //All objects in the list will be of type Waypoint.  It must not be NULL.  It may be empty.
     List* waypoints;
 
-    //Additional route data - i.e. children of the GPX route other than <name>.  
+    //Additional route data - i.e. children of the GPX route other than <name>.
     //We will assume that all waypoint children have no children of their own
     //This can be comment, description, etc.. Note that while the element <name> can be a child of the route node,
     //the name already has its own dedicated filed in the Waypoint sruct - so do not place the name in this list
@@ -76,7 +76,7 @@ typedef struct {
     //All objects in the list will be of type TrackSegment.  It must not be NULL.  It may be empty.
     List* segments;
 
-    //Additional track data - i.e. children of the GPX track other than <name>.  
+    //Additional track data - i.e. children of the GPX track other than <name>.
     //We will assume that all waypoint children have no children of their own
     //This can be comment, description, etc.. Note that while the element <name> can be a child of the track node,
     //the name already has its own dedicated filed in the Waypoint sruct - so do not place the name in this list
@@ -86,17 +86,17 @@ typedef struct {
 
 
 typedef struct {
-    
+
     //Namespace associated with our GPX doc.  Must not be an empty string. While a real GPX doc might have
     //multiple namespaces associated with it, we will assume there is only one
     char namespace[256];
-    
+
     //GPX version.  Must be initialized.  Will usually be 1.1
     double version;
-    
+
     //GPX creator. Must not be NULL. Must not be an empty string.
     char* creator;
-    
+
     //Waypoints in the GPX file
     //All objects in the list will be of type Waypoint.  It must not be NULL.  It may be empty.
     List* waypoints;
@@ -104,7 +104,7 @@ typedef struct {
     //Routes in the GPX file
     //All objects in the list will be of type Route.  It must not be NULL.  It may be empty.
     List* routes;
-    
+
     //Tracks in the GPX file
     //All objects in the list will be of type Track.  It must not be NULL.  It may be empty.
     List* tracks;
@@ -121,7 +121,7 @@ typedef struct {
        File represented by this name must exist and must be readable.
  *@post Either:
         A valid GPXdoc has been created and its address was returned
-		or 
+		or
 		An error occurred, and NULL was returned
  *@return the pinter to the new struct or NULL
  *@param fileName - a string containing the name of the GPX file
@@ -144,9 +144,9 @@ char* GPXdocToString(GPXdoc* doc);
 **/
 void deleteGPXdoc(GPXdoc* doc);
 
-/* For the five "get..." functions below, return the count of specified entities from the file.  
+/* For the five "get..." functions below, return the count of specified entities from the file.
 They all share the same format and only differ in what they have to count.
- 
+
  *@pre GPX object exists, is not null, and has not been freed
  *@post GPX object has not been modified in any way
  *@return the number of entities in the GPXdoc object
@@ -169,13 +169,13 @@ int getNumSegments(const GPXdoc* doc);
 //Total number of GPXData elements in the document
 int getNumGPXData(const GPXdoc* doc);
 
-// Function that returns a waypoint with the given name.  If more than one exists, return the first one.  
+// Function that returns a waypoint with the given name.  If more than one exists, return the first one.
 // Return NULL if the waypoint does not exist
 Waypoint* getWaypoint(const GPXdoc* doc, char* name);
-// Function that returns a track with the given name.  If more than one exists, return the first one. 
-// Return NULL if the track does not exist 
+// Function that returns a track with the given name.  If more than one exists, return the first one.
+// Return NULL if the track does not exist
 Track* getTrack(const GPXdoc* doc, char* name);
-// Function that returns a route with the given name.  If more than one exists, return the first one.  
+// Function that returns a route with the given name.  If more than one exists, return the first one.
 // Return NULL if the route does not exist
 Route* getRoute(const GPXdoc* doc, char* name);
 
@@ -193,7 +193,7 @@ Route* getRoute(const GPXdoc* doc, char* name);
        File represented by this name must exist and must be readable.
  *@post Either:
         A valid GPXdoc has been created and its address was returned
-		or 
+		or
 		An error occurred, and NULL was returned
  *@return the pinter to the new struct or NULL
  *@param gpxSchemaFile - the name of a schema file
@@ -202,7 +202,7 @@ Route* getRoute(const GPXdoc* doc, char* name);
 GPXdoc* createValidGPXdoc(char* fileName, char* gpxSchemaFile);
 
 /** Function to validating an existing a GPXobject object against a GPX schema file
- *@pre 
+ *@pre
     GPXdoc object exists and is not NULL
     schema file name is not NULL/empty, and represents a valid schema file
  *@post GPXdoc has not been modified in any way
@@ -251,7 +251,7 @@ float getTrackLen(const Track *tr);
 **/
 float round10(float len);
 
-/** Function that returns the number routes with the specified length, using the provided tolerance 
+/** Function that returns the number routes with the specified length, using the provided tolerance
  * to compare route lengths
  *@pre GPXdoc object exists, is not null
  *@post GPXdoc object exists, is not null, has not been modified
@@ -263,7 +263,7 @@ float round10(float len);
 int numRoutesWithLength(const GPXdoc* doc, float len, float delta);
 
 
-/** Function that returns the number tracks with the specified length, using the provided tolerance 
+/** Function that returns the number tracks with the specified length, using the provided tolerance
  * to compare track lengths
  *@pre GPXdoc object exists, is not null
  *@post GPXdoc object exists, is not null, has not been modified
@@ -303,7 +303,7 @@ bool isLoopTrack(const Track *tr, float delta);
  *@param sourceLong - longitude of the start location
  *@param destLat - latitude of the destination location
  *@param destLong - longitude of the destination location
- *@param delta - the tolerance used for comparing distances between waypoints 
+ *@param delta - the tolerance used for comparing distances between waypoints
 */
 List* getRoutesBetween(const GPXdoc* doc, float sourceLat, float sourceLong, float destLat, float destLong, float delta);
 
@@ -316,7 +316,7 @@ List* getRoutesBetween(const GPXdoc* doc, float sourceLat, float sourceLong, flo
  *@param sourceLong - longitude of the start location
  *@param destLat - latitude of the destination location
  *@param destLong - longitude of the destination location
- *@param delta - the tolerance used for comparing distances between waypoints 
+ *@param delta - the tolerance used for comparing distances between waypoints
 */
 List* getTracksBetween(const GPXdoc* doc, float sourceLat, float sourceLong, float destLat, float destLong, float delta);
 
@@ -410,7 +410,7 @@ Waypoint* JSONtoWaypoint(const char* gpxString);
  **/
 Route* JSONtoRoute(const char* gpxString);
 
-
+char* GPXFiletoJSON(char* gpxFile, char* xsdFile); 
 
 /* ******************************* List helper functions  - MUST be implemented *************************** */
 
