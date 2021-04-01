@@ -44,9 +44,9 @@ app.post('/upload', function(req, res) {
   if(!req.files) {
     return res.status(400).send('No files were uploaded.');
   }
- 
+
   let uploadFile = req.files.uploadFile;
- 
+
   // Use the mv() method to place the file somewhere on your server
   uploadFile.mv('uploads/' + uploadFile.name, function(err) {
     if(err) {
@@ -69,16 +69,15 @@ app.get('/uploads/:name', function(req , res){
   });
 });
 
-//******************** Your code goes here ******************** 
-/*
-let sharedLib = ffi.Library('./libgpxparser.so', {
-    /*
-    'printFunc': [ 'void', [ ] ],		//return type first, argument list second
-                                      //for void input type, leave argument list is empty
-    'addTwo': [ 'int', [ 'int' ] ],	//int return, int argument
-    'putDesc' : [ 'void', [ 'string' ] ],
-    'getDesc' : [ 'string', [] ] 
-}); */
+//******************** Your code goes here ********************
+
+let sharedLib = ffi.Library('./libgpxparser', {
+
+    'GPXFiletoJSON': [ 'string', ['string', 'string' ] ],		//return type first, argument list second
+    //'addTwo': [ 'int', [ 'int' ] ],	//int return, int argument
+    //'putDesc' : [ 'void', [ 'string' ] ],
+    //'getDesc' : [ 'string', [] ] */
+});
 
 
 //Sample endpoint
@@ -92,12 +91,12 @@ app.get('/endpoint1', function(req , res){
 });
 /*
 app.get('/endpoint1', function(req , res){
-    
+
     res.send(
       {
 
 
-        
+
       }
     );
   });
