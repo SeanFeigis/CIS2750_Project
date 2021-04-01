@@ -60,9 +60,8 @@
             <th>Version</th>
             <th>Creator</th>
             <th>Number of Waypoints</th>
-            <th>Number of routes</th>
-            <th>Number of tracks</th>
-        </tr>
+            <th>Number of Routes</th>
+            <th>Number of Tracks</th>    
 
         <tr>    
             <td><a href="simple.gpx" download ">simple.gpx</a></td>
@@ -113,27 +112,106 @@
     <br></br>
 
     <div class="scrollit">
-    <table
-        id='GPXTable' >
-        <tr>    
-            <th>Component</th>
-            <th>Name</th>
-            <th>Number of Points</th>
-            <th>Length</th>
-            <th>Loop</th>
-        </tr>
+        <table
+            id='GPXTable' >
+            <tr>    
+                <th>Component</th>
+                <th>Name</th>
+                <th>Number of Points</th>
+                <th>Length</th>
+                <th>Loop</th>
+            </tr>
 
-        <tr>    
-            <td>Route 1</td>
-            <td>Some Route</td>
-            <td>3</td>
-            <td>160m</td>
-            <td>False</td>
-        </tr>
+            <tr>    
+                <td>Route 1</td>
+                <td>Some Route</td>
+                <td>3</td>
+                <td>160m</td>
+                <td>False</td>
+            </tr>
 
-    </table>
+        </table>
     </div>
+
+    <br>    </br>
+    <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+    <br>    </br>
     
+    <br></br>
+    <h4>Create GPX</h4>
+    <br></br>
+
+    <form ref='CreateGPX'
+          id='CreateGPX'>
+          <div class="form-group">
+                <label for="entryBox">File name</label>
+                <input type="text" class="form-control" id="FileNameEntryBox" value="Value" placeholder="Placeholder">
+                <label for="entryBox">Version</label>
+                <input type="text" class="form-control" id="VersionEntryBox" value="Value" placeholder="Placeholder">
+                <label for="entryBox">Creator</label>
+                <input type="text" class="form-control" id="CreatorEntryBox" value="Value" placeholder="Placeholder">
+                <label for="entryBox">Number of Waypoints</label>
+                <input type="text" class="form-control" id="NumWaypointsEntryBox" value="Value" placeholder="Placeholder">
+                <label for="entryBox">Number of Routes</label>
+                <input type="text" class="form-control" id="NumRoutesEntryBox" value="Value" placeholder="Placeholder">
+                <label for="entryBox">Number of Tracks</label>
+                <input type="text" class="form-control" id="NumTracksEntryBox" value="Value" placeholder="Placeholder">
+          </div>
+        <div class="form-group">
+            <input type='submit' class="btn btn-secondary">
+        </div>
+    </form>
+
+    <br>    </br>
+    <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+    <br>    </br>
+    
+    <br></br>
+    <h4>Add Route</h4>
+    <br></br>
+
+
+    <form ref='AddRouteDropDown'
+          id='AddRouteDropDown'>
+          <div class="form-group">
+                <select name="AddRouteSelect" id="AddRouteSelect">
+                    <option value="simple.gpx">simple.gpx</option>
+                </select>
+          </div>
+        <div class="form-group">
+            <input type='submit' class="btn btn-secondary">
+        </div>
+    </form>
+
+    
+
+
+
+    
+    <br>    </br>
+    <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+    <br>    </br>
+    
+    <br></br>
+    <h4>Find Path Between</h4>
+    <br></br>
+
+    <form ref='FindPathBetween'
+          id='FindPathBetween'>
+          <div class="form-group">
+                <label for="entryBox">Latitude 1</label>
+                <input type="text" class="form-control" id="Lat1EntryBox" value="Value" placeholder="Placeholder">
+                <label for="entryBox">Longitude 1</label>
+                <input type="text" class="form-control" id="Long1EntryBox" value="Value" placeholder="Placeholder">
+                <label for="entryBox">Latitude 2</label>
+                <input type="text" class="form-control" id="Lat2EntryBox" value="Value" placeholder="Placeholder">
+                <label for="entryBox">Longitude 2</label>
+                <input type="text" class="form-control" id="Long2EntryBox" value="Value" placeholder="Placeholder">
+          </div>
+        <div class="form-group">
+            <input type='submit' class="btn btn-secondary">
+        </div>
+    </form>
 
     <!-- Leave me at the bottom of body -->
     <script src="/index.js"></script>

@@ -35,11 +35,30 @@ jQuery(document).ready(function() {
         option.text = "New File";
         x.add(option, x[0]);
         e.preventDefault();
+        console.log("File Drop Down Button Pressed");
         //Pass data to the Ajax call, so it gets passed to the server
         $.ajax({
             //Create an object for connecting to another waypoint
         });
     });
+
+    $('#CreateGPX').submit(function(e){
+        e.preventDefault();
+        console.log("CreateGPX Button Pressed");
+        //Pass data to the Ajax call, so it gets passed to the server
+        $.ajax({
+            //Create an object for connecting to another waypoint
+        });
+    });
+
+    $('#FindPathBetween').submit(function(e){
+        e.preventDefault();
+        console.log("FindPathBetween Button Pressed");
+        //Pass data to the Ajax call, so it gets passed to the server
+        $.ajax({
+            //Create an object for connecting to another waypoint
+        });
+    }); 
 
     $('#FileUploadForm').submit(function(e){
         console.log('Uploaded File');
