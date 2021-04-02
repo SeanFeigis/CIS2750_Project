@@ -74,23 +74,15 @@ app.get('/uploads/:name', function(req , res){
 let sharedLib = ffi.Library('./libgpxparser', {
 
     'GPXFiletoJSON' : [ 'string', ['string', 'string' ] ],		//return type first, argument list second
-    //'addTwo': [ 'int', [ 'int' ] ],	//int return, int argument
-    //'putDesc' : [ 'void', [ 'string' ] ],
+    'GPXFiletoJSONTrackList': [ 'string', ['string', 'string'] ],	//int return, int argument
+    'GPXFiletoJSONRouteList': [ 'string', ['string', 'string'] ],
+    'JSONtoGPXtoFile': [ 'void', ['string', 'string'] ]
     //'getDesc' : [ 'string', [] ] */
 });
 
 
-//Sample endpoint
-app.get('/endpoint1', function(req , res){
-  let retStr = req.query.data1 + " " + req.query.data2;
-  res.send(
-    {
-      somethingElse: retStr
-    }
-  );
-});
-
-app.get('/uploads', function(req , res){
+app.get('/uploadFiles', function(req , res){
+    
   var arr = [];
   var nameJSON = [];
 
@@ -116,10 +108,45 @@ app.get('/uploads', function(req , res){
       res.send({somethingElse:nameJSON});
   })
 
-
+  
   });
 
+  app.get('/FileSelect', function(req , res){
+    let name = req.query.data1;
+    let obj = JSON.parse(sharedLib.GPXFiletoJSONRouteList('uploads/' + name, "gpx.xsd"));
+    let obj2 = JSON.parse(sharedLib.GPXFiletoJSONTrackList('uploads/' + name, "gpx.xsd"));
+    //console.log(obj);
+    //console.log(obj2);
+    res.send({
 
+        RouteList: obj,
+        TrackList: obj2,
+
+    });
+  });
+
+  app.get('/createGPX', function(req , res){ 
+    let obj = req.query;
+    let oldObj = req.query; 
+    let obj2 = req.query.filename;
+    delete obj['filename'];
+    console.log(JSON.stringify(obj));
+
+    sharedLib.JSONtoGPXtoFile(JSON.stringify(obj), 'uploads/' + obj2);
+
+    res.send({
+        theData: oldObj 
+    });
+
+  })
+
+  app.get('/createGPX', function(req , res){ 
+   
+    res.send({
+
+    });
+
+  })
 
 app.listen(portNum);
 console.log('Running app at localhost: ' + portNum);

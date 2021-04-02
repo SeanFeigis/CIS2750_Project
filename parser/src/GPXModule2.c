@@ -339,6 +339,17 @@ void dummyDeleteTrack(void* data) {
     free(tmpTrack);
 }
 
+int getLengthofTrack(const Track *tr) {
+    int i = 0;
+    TrackSegment* tempTrack;
+    ListIterator segiterator;
+    segiterator = createIterator(tr->segments);
+    for(tempTrack = nextElement(&segiterator); tempTrack != NULL; tempTrack = nextElement(&segiterator)) {
+       i+=  getLength(tempTrack->waypoints);
+    }
+    return i;
+}
+
 char* trackToJSON(const Track *tr) {
     char* strn;
 
@@ -364,7 +375,7 @@ char* trackToJSON(const Track *tr) {
         strcpy(tempBool, "false");
     }
 
-    sprintf(strn, "{\"name\":\"%s\",\"len\":%.1f,\"loop\":%s}", tempName, round10(getTrackLen(tr)), tempBool);
+    sprintf(strn, "{\"name\":\"%s\",\"numPoints\":%d,\"len\":%.1f,\"loop\":%s}", tempName, getLengthofTrack(tr), round10(getTrackLen(tr)), tempBool);
 
     free(tempName);
     free(tempBool);
@@ -608,4 +619,28 @@ Route* JSONtoRoute(const char* gpxString) {
     return tempRoute;
 }
 
-char* GPXFiletoJSON(char* gpxFile, char* xsdFile);
+char* GPXFiletoJSONRouteList(char* gpxFile, char* xsdFile) {
+  GPXdoc* doc = malloc(sizeof(GPXdoc));
+  doc = createValidGPXdoc(gpxFile, xsdFile);
+  char* string;
+  string = routeListToJSON(doc->routes);
+  deleteGPXdoc(doc);
+  return(string);
+}
+
+char* GPXFiletoJSONTrackList(char* gpxFile, char* xsdFile) {
+  GPXdoc* doc = malloc(sizeof(GPXdoc));
+  doc = createValidGPXdoc(gpxFile, xsdFile);
+  char* string;
+  string = trackListToJSON(doc->tracks);
+  deleteGPXdoc(doc);
+  return(string);
+}
+
+void JSONtoGPXtoFile(char* JSON, char* fileName) {
+
+    GPXdoc* doc = JSONtoGPX(JSON);
+    writeGPXdoc(doc, fileName);
+    deleteGPXdoc(doc);
+
+}
