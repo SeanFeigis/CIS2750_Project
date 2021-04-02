@@ -55,6 +55,7 @@
     <div class="scrollit">
     <table
         id='FileTable'>
+        <thead>
         <tr>
             <th>FileName</th>
             <th>Version</th>
@@ -62,18 +63,18 @@
             <th>Number of Waypoints</th>
             <th>Number of Routes</th>
             <th>Number of Tracks</th>
-
-        <tr>
-            <td><a href="simple.gpx" download ">simple.gpx</a></td>
-            <td>1.1</td>
-            <td>Someone</td>
-            <td>3</td>
-            <td>1</td>
-            <td>1</td>
-        </tr>
-
+          </tr>
+        </thead>
+        <tbody> </tbody>
     </table>
     </div>
+
+    <div ref='FileLog'
+      id='FileLog'
+      value= 'Console log'>
+      Console Log
+    </div>
+
 
     <br></br>
     <h5>Upload GPX File</h5>
@@ -101,7 +102,6 @@
           id='DropDown'>
           <div class="form-group">
                 <select name="FileSelect" id="FileSelect">
-                    <option value="simple.gpx">simple.gpx</option>
                 </select>
           </div>
         <div class="form-group">
@@ -114,22 +114,24 @@
     <div class="scrollit">
         <table
             id='GPXTable' >
-            <tr>
+            <thead>
+              <tr>
                 <th>Component</th>
                 <th>Name</th>
                 <th>Number of Points</th>
                 <th>Length</th>
                 <th>Loop</th>
-            </tr>
-
-            <tr>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
                 <td>Route 1</td>
                 <td>Some Route</td>
                 <td>3</td>
                 <td>160m</td>
                 <td>False</td>
-            </tr>
-
+              </tr>
+            </tbody>
         </table>
     </div>
 

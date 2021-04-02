@@ -35,7 +35,7 @@ th, td {
 
 .scrollit {
     overflow:scroll;
-    height:200px;
+    height:300px;
 }
 
 @media(max-width: 900px) {

@@ -90,13 +90,36 @@ app.get('/endpoint1', function(req , res){
   );
 });
 
-app.get('/FileRetrieve', function(req , res){
-    res.send(
-      {
+app.get('/uploads', function(req , res){
+  var arr = [];
+  var nameJSON = [];
 
+  const path = require("path");
+  fs.readdir('uploads/', (err, files) => {
+    if (err)
+      console.log(err);
+    else {
+      //console.log("\Filenames with the .txt extension:");
+      files.forEach(file => {
+        if (path.extname(file) == ".gpx") {
+
+          let file2 = 'uploads/' + file;
+          //console.log(file);
+          let obj = JSON.parse(sharedLib.GPXFiletoJSON(file2, "gpx.xsd"));
+          obj['filename'] = file;
+          nameJSON.push(obj);
+          //nameJSON.push(file);
+          //console.log(nameJSON);
+          }
+       })
       }
-    );
+      res.send({somethingElse:nameJSON});
+  })
+
+
   });
+
+
 
 app.listen(portNum);
 console.log('Running app at localhost: ' + portNum);
