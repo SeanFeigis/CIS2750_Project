@@ -72,7 +72,7 @@
     <div ref='FileLog'
       id='FileLog'
       value= 'Console log'>
-      Console Log
+      File Console Log
     </div>
 
 
@@ -128,7 +128,14 @@
               </tr>
             </tbody>
         </table>
+        <div ref='GPXLog'
+            id='GPXLog'
+            value= 'Console log'>
+            GPX Console Log
     </div>
+    </div>
+
+    
 
     <h4>Show GPX Data</h4>
 
@@ -139,7 +146,6 @@
                 </select>
                 <input type='submit' value='Submit' class="btn btn-secondary">
           </div>
-          <input id="gpxdataout" type="text" value="Data" class="field left" readonly>
     </form>
 
     <br></br>
@@ -151,7 +157,7 @@
           <div class="form-group">
                 <select name="RenameSelect" id="RenameSelect" value="FileName" Filename > 
                 </select>
-                <input type='submit' value='Submit' class="btn btn-secondary">
+                <input id=renameID type='submit' value='Submit' class="btn btn-secondary">
           </div>
           <input id="renameButton" type="text" value="New Name" class="field left">
     </form>
@@ -172,10 +178,10 @@
                 <label for="entryBox">Version</label>
                 <input type="text" class="form-control" id="VersionEntryBox" value="1.1" placeholder="1.1">
                 <label for="entryBox">Creator</label>
-                <input type="text" class="form-control" id="CreatorEntryBox" value="cringe" placeholder="cringe">
+                <input type="text" class="form-control" id="CreatorEntryBox" value="Name" placeholder="Some Name">
           </div>
         <div class="form-group">
-            <input type='submit' class="btn btn-secondary">
+            <input type='submit' value='Create GPX' class="btn btn-secondary">
         </div>
     </form>
 
@@ -191,16 +197,26 @@
     <form ref='AddRouteDropDown'
           id='AddRouteDropDown'>
           <div class="form-group">
-                <select name="AddRouteSelect" id="AddRouteSelect">
-                    <option value="simple.gpx">simple.gpx</option>
-                </select>
+                <select name="AddRouteSelect" id="AddRouteSelect"></select>
           </div>
+          <div value=2 id="entry" class="form-group">
+            <label for="entryBox">Lat1</label>
+            <input type="text" class="form-control" id="FileNameEntryBox" value="123.456" placeholder="something.gpx">
+            <label for="entryBox">Long1</label>
+            <input type="text" class="form-control" id="VersionEntryBox" value="123.456" placeholder="1.1">
+      </div>
         <div class="form-group">
-            <input type='submit' class="btn btn-secondary">
+            <input type='submit' value='Add Route' class="btn btn-secondary">
         </div>
     </form>
 
-
+    <form ref='Addwpt'
+        id='Addwpt'>
+        <div class="form-group">
+            <input type='submit' value='Add Waypoint' class="btn btn-secondary">
+        </div>
+    </form>
+   
 
 
 
@@ -228,7 +244,7 @@
                 <input type="text" class="form-control" id="AccuracyEntryBox" value="Value" placeholder="Placeholder">
           </div>
         <div class="form-group">
-            <input type='submit' class="btn btn-secondary">
+            <input type='submit' value='Find Path' class="btn btn-secondary">
         </div>
     </form>
 

@@ -76,7 +76,8 @@ let sharedLib = ffi.Library('./libgpxparser', {
     'GPXFiletoJSON' : [ 'string', ['string', 'string' ] ],		//return type first, argument list second
     'GPXFiletoJSONTrackList': [ 'string', ['string', 'string'] ],	//int return, int argument
     'GPXFiletoJSONRouteList': [ 'string', ['string', 'string'] ],
-    'JSONtoGPXtoFile': [ 'void', ['string', 'string'] ]
+    'JSONtoGPXtoFile': [ 'void', ['string', 'string'] ],
+    'RouteNameToJson': [ 'string', ['string', 'string' ] ]
     //'getDesc' : [ 'string', [] ] */
 });
 
@@ -128,9 +129,10 @@ app.get('/uploadFiles', function(req , res){
   app.get('/createGPX', function(req , res){ 
     let obj = req.query;
     let oldObj = req.query; 
+    obj['version'] = parseFloat(obj.version);
     let obj2 = req.query.filename;
     delete obj['filename'];
-    console.log(JSON.stringify(obj));
+    //console.log(JSON.stringify(obj));
 
     sharedLib.JSONtoGPXtoFile(JSON.stringify(obj), 'uploads/' + obj2);
 
@@ -140,13 +142,43 @@ app.get('/uploadFiles', function(req , res){
 
   })
 
-  app.get('/createGPX', function(req , res){ 
-   
-    res.send({
+  app.get('/showGPX', function(req , res){ 
+    let name = req.query.name;
+    let file = req.query.file;
+    let string = "No data was found";
+    /*
+    let string = sharedLib.RouteNameToJson('uploads/'+file, name);
+    console.log(string);
 
+    
+    
+    res.send(error);
+   
+    */
+    res.send({
+        theData: string 
     });
 
   })
+
+  app.get('/rename', function(req , res){ 
+    
+    let string = "No data was found";
+    /*
+    let string = sharedLib.RouteNameToJson('uploads/'+file, name);
+    console.log(string);
+
+    
+    
+    res.send(error);
+   
+    */
+    res.send({
+        theData: string 
+    });
+
+  })
+  
 
 app.listen(portNum);
 console.log('Running app at localhost: ' + portNum);

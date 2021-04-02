@@ -644,3 +644,90 @@ void JSONtoGPXtoFile(char* JSON, char* fileName) {
     deleteGPXdoc(doc);
 
 }
+
+char* gpxDataToJSON(GPXData* data) {
+    char* strn;
+
+    if (data == NULL) {
+        strn = malloc(3);
+        strcpy(strn, "{}");
+        return strn;
+    }
+
+    strn = (char*) malloc(256);
+
+    char* tempName = (char*) malloc(256);
+    if (strcmp(data->name, "")==0 ) {
+        strcpy(tempName, "None");
+    } else {
+        strcpy(tempName, data->name);
+    }
+
+
+    sprintf(strn, "{\"name\":\"%s\",\"value\":\"%s\"}", tempName, data->value);
+    free(tempName);
+
+    return(strn);
+}
+
+char* gpxDataListToJSON(const List *list) {
+    char* strn;
+
+    if (list == NULL ) {
+        strn = malloc(3);
+        strcpy(strn, "[]");
+        return strn;
+    }
+
+    if (getLength((List*) list) == 0) {
+        strn = malloc(3);
+        strcpy(strn, "[]");
+        return strn;
+    }
+    int i = 0;
+    ListIterator trackIterator;
+    GPXData* tempTrack;
+    strn = (char*) malloc(2048);
+
+    strcpy(strn, "[");
+
+    char* trktJSONchar;
+    trackIterator = createIterator((List*) list);
+    for(tempTrack = nextElement(&trackIterator); tempTrack != NULL; tempTrack = nextElement(&trackIterator)) {
+        if (i > 0) {
+            strcat(strn, ",");
+        }
+        trktJSONchar = gpxDataToJSON(tempTrack);
+        strcat(strn, trktJSONchar);
+        free(trktJSONchar);
+        i++;
+    }
+
+    strcat(strn, "]");
+
+    return(strn);
+}
+
+char* RouteNameToJson(char* filename, char* routeName) {
+    
+    GPXdoc* doc = malloc(sizeof(GPXdoc));
+    doc = createValidGPXdoc(filename, "gpx.xsd");
+    if (doc == NULL) {
+        return NULL;
+    }
+
+    Track* tempTrack;
+    Route* tempRoute;
+    char* strn = NULL;
+
+    if ((tempTrack = getTrack(doc, routeName)) != NULL) {
+        strn = gpxDataListToJSON(tempTrack->otherData);
+    }
+
+    if ((tempRoute = getRoute(doc, routeName)) != NULL) {
+        strn = gpxDataListToJSON(tempTrack->otherData);
+    }
+
+    return(strn);
+
+}

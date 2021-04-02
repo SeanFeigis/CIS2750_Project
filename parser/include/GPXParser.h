@@ -415,6 +415,9 @@ char* GPXFiletoJSONRouteList(char* gpxFile, char* xsdFile);
 char* GPXFiletoJSONTrackList(char* gpxFile, char* xsdFile);
 int getLengthofTrack(const Track *tr);
 void JSONtoGPXtoFile(char* JSON, char* fileName);
+char* gpxDataListToJSON(const List *list);
+char* gpxDataToJSON(GPXData* data);
+char* RouteNameToJson(char* filename, char* routeName);
 /* ******************************* List helper functions  - MUST be implemented *************************** */
 
 void deleteGpxData( void* data);
