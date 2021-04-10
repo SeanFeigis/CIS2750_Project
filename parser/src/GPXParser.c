@@ -603,6 +603,9 @@ Route* getRoute(const GPXdoc* doc, char* name) {
 char* GPXFiletoJSON(char* gpxFile, char* xsdFile) {
   GPXdoc* doc = malloc(sizeof(GPXdoc));
   doc = createValidGPXdoc(gpxFile, xsdFile);
+  if (doc == NULL) {
+    return NULL;
+  }
   char* string;
   string = GPXtoJSON(doc);
   deleteGPXdoc(doc);

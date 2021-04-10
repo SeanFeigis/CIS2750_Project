@@ -77,6 +77,7 @@ let sharedLib = ffi.Library('./libgpxparser', {
     'GPXFiletoJSONTrackList': [ 'string', ['string', 'string'] ],	//int return, int argument
     'GPXFiletoJSONRouteList': [ 'string', ['string', 'string'] ],
     'JSONtoGPXtoFile': [ 'void', ['string', 'string'] ],
+    'JSONListToWaypointList': [ 'void', ['string', 'string', 'string', 'string'] ],
     'RouteNameToJson': [ 'string', ['string', 'string' ] ]
     //'getDesc' : [ 'string', [] ] */
 });
@@ -99,8 +100,14 @@ app.get('/uploadFiles', function(req , res){
           let file2 = 'uploads/' + file;
           //console.log(file);
           let obj = JSON.parse(sharedLib.GPXFiletoJSON(file2, "gpx.xsd"));
-          obj['filename'] = file;
-          nameJSON.push(obj);
+          console.log(obj);
+          if (obj != null) {
+              if (Object.entries(obj).length != 0) {
+                obj['filename'] = file;
+                nameJSON.push(obj);
+              }
+          }
+          
           //nameJSON.push(file);
           //console.log(nameJSON);
           }
@@ -153,6 +160,7 @@ app.get('/uploadFiles', function(req , res){
     
     
     res.send(error);
+
    
     */
     res.send({
@@ -175,6 +183,29 @@ app.get('/uploadFiles', function(req , res){
     */
     res.send({
         theData: string 
+    });
+
+  })
+
+  app.get('/addRoute', function(req , res){ 
+    let name = req.query.Name;
+    let filename = req.query.filename;
+    let latArr = req.query.latVals;
+    let longArr = req.query.longVals;
+    let numWpts = req.query.numWpts;
+    let objArr = [];
+
+    for (let i = 0; i < numWpts; i++) {
+        let obj = { "lat": latArr[i], "lon": longArr[i]};
+        objArr.push(obj);
+    }
+
+    console.log(filename);
+
+    sharedLib.JSONListToWaypointList(JSON.stringify(objArr), name ,'uploads/' + filename ,numWpts);
+
+    res.send({
+
     });
 
   })

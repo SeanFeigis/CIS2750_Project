@@ -281,14 +281,14 @@ jQuery(document).ready(function() {
         e.preventDefault();
         console.log("Add Waypoint Button pressed");
         var childrencount = document.getElementById("entry");
-        let val = childrencount.childElementCount;
+        let val = childrencount.childElementCount -2 ;
         //console.log(val);
 
         let NewInput = document.createElement('div');
-        NewInput.innerHTML = "<label for='entryBox'>Lat"+val/2+"</label> <input type='text' value='123.456' class='form-control' id='newInputBox"+eval(val)+1+"'>";
+        NewInput.innerHTML = "<label for='entryBox'>Lat"+val/2+"</label> <input type='text' value='12.34' class='form-control' id='Lat"+(val/2)+"'>";
         document.getElementById("entry").appendChild(NewInput);
         NewInput = document.createElement('div');
-        NewInput.innerHTML = "<label for='entryBox'>Long"+val/2+"</label> <input type='text' value='123.456' class='form-control' id='newInputBox"+eval(val)+2+"'>";
+        NewInput.innerHTML = "<label for='entryBox'>Long"+val/2+"</label> <input type='text' value='12.34' class='form-control' id='Long"+(val/2)+"'>";
         document.getElementById("entry").appendChild(NewInput);
 
         $('#entry').attr("value", val+2);
@@ -303,9 +303,39 @@ jQuery(document).ready(function() {
     $('#AddRouteDropDown').submit(function(e){
         e.preventDefault();
         console.log("Add Route Button Pressed");
+        let fileName = document.getElementById("AddRouteSelect").value
+        var latarr = [];
+        var longarr = [];
+        var childrencount = document.getElementById("entry");
+        let val = (childrencount.childElementCount -2)/2 -1;
+        console.log(val);
+        let name = document.getElementById("AddRouteName").value
+        for (var i = 1; i <= val; i++) {
+            latarr.push(document.getElementById("Lat"+i+"").value);
+            longarr.push(document.getElementById("Long"+i+"").value)
+        }
 
         $.ajax({
-            //Create an object for connecting to another waypoint
+            type: 'get',            //Request type
+            dataType: 'json',       //Data type - we will use JSON for almost everything
+            url: '/addRoute',   //The server endpoint we are connecting to
+            data: {
+                
+                Name : name,
+                latVals : latarr,
+                longVals : longarr,
+                numWpts : val,
+                filename: fileName
+            },
+
+            success: function (data) {
+
+
+            },
+            fail: function(error) {
+                console.log(error);
+            }
+        
         });
     });
 

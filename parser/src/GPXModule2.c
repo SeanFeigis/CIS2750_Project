@@ -350,6 +350,7 @@ int getLengthofTrack(const Track *tr) {
     return i;
 }
 
+
 char* trackToJSON(const Track *tr) {
     char* strn;
 
@@ -561,6 +562,74 @@ GPXdoc* JSONtoGPX(const char* gpxString) {
 
 }
 
+void JSONListToWaypointList(char* list, char* name, char* filename, char* numWpts) {
+    if (list == NULL|| name == NULL || filename == NULL || numWpts == NULL) {
+        return ;
+    }
+    GPXdoc* doc = malloc(sizeof(GPXdoc));
+    doc = createValidGPXdoc(filename, "gpx.xsd");
+    List* wptList = initializeList(&waypointToString, &deleteWaypoint, &compareWaypoints);
+    char* commaChar1;
+    char* someChar = malloc(1024);
+    strcpy(someChar, list);
+    Waypoint* wpt;
+    int num = atoi(numWpts);
+    char** strArray = malloc(num * 8);
+    //printf("%s\n", list);
+    
+    commaChar1 = strtok(someChar, "[");
+    commaChar1[strlen(commaChar1)-1] = '\0';
+    printf("%s\n", commaChar1);
+
+    commaChar1 = strtok(commaChar1, "{");
+    for (int i = 0; i < num-1; i++) {
+        commaChar1[strlen(commaChar1)-1] = '\0';
+        char* tempChar = malloc(256);
+        strcpy(tempChar, "{");
+        strcat(tempChar, commaChar1);
+        strArray[i] = malloc(strlen(tempChar)+1);
+        strcpy(strArray[i], tempChar);
+        //printf("%s\n", tempChar);
+        commaChar1 = strtok(NULL, "{"); 
+        //wpt = JSONtoWaypoint(tempChar);
+        //insertBack(wptList, wpt);
+        free(tempChar);
+    }
+    char* tempChar = malloc(256);
+    strncpy(tempChar, "{", 2);
+    strncat(tempChar, commaChar1, strlen(commaChar1)+1);
+    //printf("%s\n", tempChar);
+    strArray[num-1] = malloc(strlen(tempChar)+1);
+    strcpy(strArray[num-1], tempChar);
+    //printf("Cringe\n");
+    //wpt = JSONtoWaypoint(tempChar);
+    //insertBack(wptList, wpt);
+    free(tempChar);
+
+    for (int i = 0; i < num; i++) {
+        printf("%s\n", strArray[i]);
+        wpt = JSONtoWaypoint(strArray[i]);
+        insertBack(wptList, wpt);
+        free(strArray[i]);
+    }
+
+    free(strArray);
+
+    Route* rte = malloc(sizeof(Route));
+
+    rte->name = malloc(strlen(name)+1);
+    strcpy(rte->name, name);
+    rte->waypoints = wptList;
+    rte->otherData = initializeList(&gpxDataToString, &deleteGpxData, &compareGpxData);
+    addRoute(doc, rte);
+    writeGPXdoc(doc, filename);
+    deleteGPXdoc(doc);
+
+    free(someChar);
+
+    return;
+}
+
 Waypoint* JSONtoWaypoint(const char* gpxString) {
     if (gpxString == NULL) {
         return NULL;
@@ -572,20 +641,22 @@ Waypoint* JSONtoWaypoint(const char* gpxString) {
     char* commaChar2;
     char* colonChar;
 
-
     commaChar1 = strtok((char*)gpxString, ",");
     commaChar2 = strtok(NULL, ",");
 
     colonChar = strtok(commaChar1, ":");
     colonChar = strtok(NULL, ":");
+    colonChar = strtok(colonChar, "\"");
 
+    //printf("%s\n", colonChar);
     lat = atof(colonChar);
 
     colonChar = strtok(commaChar2, ":");
     colonChar = strtok(NULL, ":");
-
+    colonChar = strtok(colonChar, "\"");
+    
     lon = atof(colonChar);
-
+    //printf("%s\n", colonChar);
 
     tempWaypoint->latitude = lat;
     tempWaypoint->longitude = lon;
@@ -595,6 +666,7 @@ Waypoint* JSONtoWaypoint(const char* gpxString) {
 
     return tempWaypoint;
 }
+
 
 Route* JSONtoRoute(const char* gpxString) {
     if (gpxString == NULL) {
