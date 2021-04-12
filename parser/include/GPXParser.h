@@ -419,6 +419,8 @@ char* gpxDataListToJSON(const List *list);
 char* gpxDataToJSON(GPXData* data);
 char* RouteNameToJson(char* filename, char* routeName);
 void JSONListToWaypointList(char* list, char* name, char* filename, char* numWpts);
+char* renameRoute(char* filename, char* newName, char* oldName);
+char* routeToWaypointList(char* filename, char* route);
 /* ******************************* List helper functions  - MUST be implemented *************************** */
 
 void deleteGpxData( void* data);

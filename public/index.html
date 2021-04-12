@@ -4,9 +4,9 @@
     <title>GPX</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="CHANGE ME">
+    <meta name="description" content="website">
     <meta name="keywords" content="CHANGE ME">
-    <meta name="author" content="CHANGE ME">
+    <meta name="author" content="Sean Feigis">
     <!-- Load jquery, bootstrap -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -159,7 +159,7 @@
                 </select>
                 <input id=renameID type='submit' value='Submit' class="btn btn-secondary">
           </div>
-          <input id="renameButton" type="text" value="New Name" class="field left">
+          <input id="renametext" type="text" value="New Name" class="field left">
     </form>
 
     <br>    </br>
@@ -265,6 +265,158 @@
             </tbody>
         </table>
     </div>
+
+
+    <br>    </br>
+    <hr style="height:10px;border-width:0;color:gray;background-color:gray">
+    <br>    </br>
+
+    <h3>ASSIGNMENT 4</h3>
+    <br></br>
+
+    <br>    </br>
+    <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+    <br>    </br>
+
+    <h4>LOGIN</h4>
+    <br></br>
+
+    <form ref='Login'
+          id='LoginForm'>
+          <div class="form-group">
+                <label for="entryBox">Username</label>
+                <input type="text" class="form-control" id="userEntryBox" value="sfeigis" placeholder="Username">
+                <label for="entryBox">Password</label>
+                <input type="text" class="form-control" id="passEntryBox" value="1096849" placeholder="Password">
+                <label for="entryBox">Database</label>
+                <input type="text" class="form-control" id="dataEntryBox" value="sfeigis" placeholder="Database">
+          </div>
+        <div class="form-group">
+            <input type='submit' value='Login' class="btn btn-secondary">
+        </div>
+    </form>
+
+
+    <br>    </br>
+    <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+    <br>    </br>
+
+
+    <form ref='Store All Files'
+          id='StoreFile'>
+          <h4>Store Files <h4>
+          <div class="form-group">         
+                <input type='submit' value='Store' id='storeFilesButton' class="btn btn-secondary">
+          </div>
+    </form>
+
+    <br></br>
+
+    <form ref='cleardata'
+          id='cleardata'>
+          <h4>Clear All Data<h4>
+          <div class="form-group">         
+                <input type='submit' value='Clear' id='cleardataButton' class="btn btn-secondary">
+          </div>
+    </form>
+
+    <br></br>
+
+    <form ref='displaystatus'
+          id='displaystatus'>
+          <h4>Display DB Status<h4>
+          <div class="form-group">         
+                <input type='submit' value='Display' id='displaystatusButton' class="btn btn-secondary">
+          </div>
+    </form>
+
+    <br></br>
+
+    <form ref='executequery'
+          id='executequery'>
+          <div class="form-group">
+                <select name="querySelect" id="executequerySelect" value="Query"  > 
+                    <option value="1">Display All Routes</option>
+                    <option value="2">Display Routes from Specific File</option>
+                    <option value="3">Display All Points of Route</option>
+                    <option value="4">Display All From Specific File</option>
+                    <option value="5">Display N shortest/longest by file</option>
+                </select>
+                <button  id='executeQuery' class="btn btn-secondary">Query</button>
+    </form>
+
+    
+
+
+    <br></br>
+
+    <form ref='queryFileDropDown'
+          id='queryFileDropDown'>
+          <div class="form-group">
+                <select name="querySelect" id="queryFileDropDownSelect" value="Query" > 
+                </select>
+          </div>
+    </form>
+
+
+    <form ref='queryRouteDropDown'
+          id='queryRouteDropDown'>
+          <div class="form-group">
+                <select name="querySelect" id="queryRouteDropDownSelect" value="Query" Route > 
+                </select>
+          </div>
+    </form>
+
+    <form ref='NameOrLengthDropDown'
+          id='NameOrLengthDropDown'>
+          <div class="form-group">
+                <select name="querySelect" id="NameOrLengthDropDownSelect" value="Query" Route >
+                    <option value="1">Name</option>
+                    <option value="2">Length</option> 
+                </select>
+          </div>
+    </form>
+
+    <form ref='longestDropDown'
+          id='longestDropDown'>
+          <div class="form-group">
+                <select name="querySelect" id="longestDropDownSelect" value="Query" Route >
+                    <option value="1">Longest</option>
+                    <option value="2">Shortest</option> 
+                </select>
+          </div>
+    </form>
+
+    <form ref='numPoints'
+          id='numPoints'>
+          <div class="form-group">
+                <input type='number' id='numPointsBox' placeholder="Number of points">
+          </div>
+    </form>
+
+    <br></br>
+    <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+
+    <h4>Query Table</h4>
+    <div class="scrollit">
+    <table
+        id='QueryTable'>
+        <thead id='QueryTableHead'>
+        </thead>
+        <tbody id='QueryTableBody'> 
+        </tbody>
+    </table>
+    </div>
+
+
+
+
+
+
+    <br></br>
+    <hr style="height:10px;border-width:0;color:gray;background-color:gray">
+    <br>    </br>
+    <br></br>
 
     <!-- Leave me at the bottom of body -->
     <script src="/index.js"></script>

@@ -6,6 +6,7 @@
 
 void dummyDeleteRoute(void* data);
 void dummyDeleteTrack(void* data);
+char* waypointToJSON(Waypoint* wpt);
 
 float round10(float len) {
 
@@ -579,7 +580,7 @@ void JSONListToWaypointList(char* list, char* name, char* filename, char* numWpt
     
     commaChar1 = strtok(someChar, "[");
     commaChar1[strlen(commaChar1)-1] = '\0';
-    printf("%s\n", commaChar1);
+    //printf("%s\n", commaChar1);
 
     commaChar1 = strtok(commaChar1, "{");
     for (int i = 0; i < num-1; i++) {
@@ -607,7 +608,7 @@ void JSONListToWaypointList(char* list, char* name, char* filename, char* numWpt
     free(tempChar);
 
     for (int i = 0; i < num; i++) {
-        printf("%s\n", strArray[i]);
+        //printf("%s\n", strArray[i]);
         wpt = JSONtoWaypoint(strArray[i]);
         insertBack(wptList, wpt);
         free(strArray[i]);
@@ -802,4 +803,116 @@ char* RouteNameToJson(char* filename, char* routeName) {
 
     return(strn);
 
+}
+
+char* renameRoute(char* filename, char* newName, char* oldName) {
+
+    GPXdoc* doc = malloc(sizeof(GPXdoc));
+    doc = createValidGPXdoc(filename, "gpx.xsd");
+    if (doc == NULL) {
+        return NULL;
+    }
+
+    Route* rte;
+    Track* trk;
+
+    rte = getRoute(doc, oldName);
+    trk = getTrack(doc, oldName);
+
+    if (rte != NULL) {
+        char* name = malloc(strlen(newName)+1);
+        strcpy(name, newName);
+        free(rte->name);
+        rte->name = name;
+
+        writeGPXdoc(doc, filename);
+        deleteGPXdoc(doc);
+
+        return("1");
+    }
+    
+    if (trk != NULL) {
+        char* name = malloc(strlen(newName)+1);
+        strcpy(name, newName);
+        free(trk->name);
+        trk->name = name;
+
+        writeGPXdoc(doc, filename);
+        deleteGPXdoc(doc);
+
+        return("1");
+    }
+
+
+    return(NULL);
+}
+
+char* waypointToJSON(Waypoint* wpt) {
+    if  (wpt == NULL) {
+        return NULL;
+    }
+
+    char* temp;
+    temp = malloc(256);
+
+    sprintf(temp, "{\"name\":\"%s\",\"lon\":%f,\"lat\":%f}", wpt->name, wpt->latitude, wpt->longitude);
+    return(temp);
+}
+
+char* routeToWaypointList(char* filename, char* routeNum) {
+
+    if (filename == NULL || routeNum == NULL) {
+        return NULL;
+    }
+
+    GPXdoc* doc = createValidGPXdoc(filename, "gpx.xsd");
+    Route* rte;
+    ListIterator routeIterator;
+    int max = atoi(routeNum);
+    routeIterator = createIterator(doc->routes);
+
+    for (int i = 0; i <= max; i++) {
+        rte = nextElement(&routeIterator);
+    }
+
+    char* strn;
+
+    if (rte == NULL) {
+        return NULL;
+    }
+    
+    if (rte->waypoints == NULL ) {
+        strn = malloc(3);
+        strcpy(strn, "[]");
+        return strn;
+    }
+
+    if (getLength((List*) rte->waypoints) == 0) {
+        strn = malloc(3);
+        strcpy(strn, "[]");
+        return strn;
+    }
+
+    int i = 0;
+    ListIterator waypointIterator;
+    Waypoint* tempWaypoint;
+    strn = (char*) malloc(2048);
+
+    strcpy(strn, "[");
+
+    char* trktJSONchar;
+    waypointIterator = createIterator((List*) rte->waypoints);
+    for(tempWaypoint = nextElement(&waypointIterator); tempWaypoint != NULL; tempWaypoint = nextElement(&waypointIterator)) {
+        if (i > 0) {
+            strcat(strn, ",");
+        }
+        trktJSONchar = waypointToJSON(tempWaypoint);
+        strcat(strn, trktJSONchar);
+        free(trktJSONchar);
+        i++;
+    }
+
+    strcat(strn, "]");
+
+    return(strn);
 }

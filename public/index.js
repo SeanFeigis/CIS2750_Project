@@ -1,7 +1,20 @@
 // Put all onload AJAX calls here, and event listeners
+
 jQuery(document).ready(function() {
     // On page-load AJAX Example
     
+    var creatorData;
+    var filenameData;
+    var versionData;
+
+    var dbConf = {};
+
+    $("#queryFileDropDownSelect").hide();
+    $("#queryRouteDropDownSelect").hide();
+    $("#longestDropDownSelect").hide();
+    $("#NameOrLengthDropDownSelect").show();
+    $("#numPointsBox").hide();
+
     jQuery.ajax({
         type: 'get',            //Request type
         dataType: 'json',       //Data type - we will use JSON for almost everything
@@ -13,15 +26,49 @@ jQuery(document).ready(function() {
 
           //console.log("testing");
           //console.log(data.somethingElse);
-          let thedata = data.somethingElse;
+          document.getElementById("cleardataButton").disabled = false;
+          document.getElementById("storeFilesButton").disabled = false;
+          
 
+        if ($.isEmptyObject(dbConf)) {
+            document.getElementById("cleardataButton").disabled = true;
+            document.getElementById("storeFilesButton").disabled = true;
+            document.getElementById("displaystatusButton").disabled = true;
+            document.getElementById("executeQuery").disabled = true;
+            document.getElementById("queryFileDropDownSelect").disabled = true;
+            document.getElementById("queryRouteDropDownSelect").disabled = true;
+            document.getElementById("NameOrLengthDropDownSelect").disabled = true;
+            document.getElementById("executequerySelect").disabled = true;
+        } else {
+            document.getElementById("cleardataButton").disabled = false;
+            document.getElementById("storeFilesButton").disabled = false;
+            document.getElementById("displaystatusButton").disabled = false;
+            document.getElementById("executeQuery").disabled = false;
+            document.getElementById("queryFileDropDownSelect").disabled = false;
+            document.getElementById("queryRouteDropDownSelect").disabled = false;
+            document.getElementById("NameOrLengthDropDownSelect").disabled = false;
+            document.getElementById("executequerySelect").disabled = false;
+        }
+
+
+
+          let thedata = data.somethingElse;
+          creatorData = new Array(thedata.length);
+          filenameData = new Array(thedata.length);
+          versionData = new Array(thedata.length);
+          
           if (thedata.length == 0 ) {
-             jQuery('#FileLog').html("Console: No Files Loaded");
+            jQuery('#FileLog').html("Console: No Files Loaded");
+            document.getElementById("storeFilesButton").disabled = true;
           }
 
 
           for (var i = 0; i < thedata.length; i++) {
             var obj = thedata[i];
+
+            creatorData[i] = obj.creator;
+            filenameData[i] = obj.filename;
+            versionData[i] = obj.version;
 
             var table = document.getElementById("FileTable").getElementsByTagName('tbody')[0];
             var row = table.insertRow(0);
@@ -53,8 +100,6 @@ jQuery(document).ready(function() {
             
 
             }
-
-
 
 
           console.log("GPX files read");
@@ -231,6 +276,10 @@ jQuery(document).ready(function() {
 
     $('#RenameData').submit(function(e){ 
         e.preventDefault();
+
+        let newName = document.getElementById("renametext").value;
+        let oldName =  document.getElementById("RenameSelect").value;
+        let filename =  document.getElementById("FileSelect").value;
         console.log("Rename Button Pressed");
         //alert("Rename of "+ document.getElementById("renameID").val +"Failed!");
         jQuery('#GPXLog').html("Console: Rename Failed");
@@ -241,16 +290,98 @@ jQuery(document).ready(function() {
             dataType: 'json',       //Data type - we will use JSON for almost everything
             url: '/rename',   //The server endpoint we are connecting to
             data: {
-                
+                value1 : newName,
+                value2 : oldName,
+                value3 : filename
             },
 
             success: function (data) {
+
+                if (data.theData == null) {
+                    jQuery('#GPXLog').html("Console: Rename Failed");
+                } else {
+                    jQuery('#GPXLog').html("Console: File Renamed!");
+                }
+
+                if ($.isEmptyObject(dbConf) == false) {
+
+                    $.ajax({
+            
+                        type: 'get',            //Request type
+                        dataType: 'json',       //Data type - we will use JSON for almost everything
+                        url: '/cleardata',   //The server endpoint we are connecting to
+                        data: {
+                            loginInfo : dbConf,
+                        },
+            
+                        success: function (data) {
+            
+                            $.ajax({
+                
+                                type: 'get',            //Request type
+                                dataType: 'json',       //Data type - we will use JSON for almost everything
+                                url: '/storeFile',   //The server endpoint we are connecting to
+                                data: {
+                                    loginInfo : dbConf,
+                                    creatorData : creatorData,
+                                    filenameData : filenameData,
+                                    versionData : versionData
+                                },
+                    
+                                success: function (data) {
+                                    let variable = document.getElementById("queryFileDropDownSelect").value;
+                                    $.ajax({
+                                            
+                                        type: 'get',            //Request type
+                                        dataType: 'json',       //Data type - we will use JSON for almost everything
+                                        url: '/getRoutesFromFile',   //The server endpoint we are connecting to
+                                        data: {
+                                            loginInfo : dbConf,
+                                            filename : variable
+                                        },
+
+                                        success: function (data) {
+                                            let rows = data.rows;
+
+                                            console.log(rows);
+
+                                            $('#queryRouteDropDownSelect').empty();
+                                            for (let row of rows) {
+                                                var x = document.getElementById("queryRouteDropDownSelect");
+                                                var option = document.createElement("option");
+                                                option.text = row.route_name;
+                                                option.value = row.route_name;
+                                                x.add(option, x[0]);
+                                            }
+
+                                        },
+                                        fail: function(error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                },
+                                fail: function(error) {
+                                    console.log(error);
+                                }
+                            });
+                            
+                        },
+                        fail: function(error) {
+                            console.log(error);
+                        }
+                    });
+                }
+
+                
+
 
             },
             fail: function(error) {
                 console.log(error);
             }
-        });
+
+        });   
+
     });
 
 
@@ -308,12 +439,14 @@ jQuery(document).ready(function() {
         var longarr = [];
         var childrencount = document.getElementById("entry");
         let val = (childrencount.childElementCount -2)/2 -1;
-        console.log(val);
+        //console.log(val);
         let name = document.getElementById("AddRouteName").value
         for (var i = 1; i <= val; i++) {
             latarr.push(document.getElementById("Lat"+i+"").value);
             longarr.push(document.getElementById("Long"+i+"").value)
         }
+
+       
 
         $.ajax({
             type: 'get',            //Request type
@@ -330,88 +463,640 @@ jQuery(document).ready(function() {
 
             success: function (data) {
 
+                if ($.isEmptyObject(dbConf) == false) {
+                    $.ajax({
+            
+                        type: 'get',            //Request type
+                        dataType: 'json',       //Data type - we will use JSON for almost everything
+                        url: '/cleardata',   //The server endpoint we are connecting to
+                        data: {
+                            loginInfo : dbConf,
+                        },
+            
+                        success: function (data) {
+            
+                            $.ajax({
+                
+                                type: 'get',            //Request type
+                                dataType: 'json',       //Data type - we will use JSON for almost everything
+                                url: '/storeFile',   //The server endpoint we are connecting to
+                                data: {
+                                    loginInfo : dbConf,
+                                    creatorData : creatorData,
+                                    filenameData : filenameData,
+                                    versionData : versionData
+                                },
+                    
+                                success: function (data) {
+                                    let variable = document.getElementById("queryFileDropDownSelect").value;
+                                    $.ajax({
+                                            
+                                        type: 'get',            //Request type
+                                        dataType: 'json',       //Data type - we will use JSON for almost everything
+                                        url: '/getRoutesFromFile',   //The server endpoint we are connecting to
+                                        data: {
+                                            loginInfo : dbConf,
+                                            filename : variable
+                                        },
 
+                                        success: function (data) {
+                                            let rows = data.rows;
+
+                                            console.log(rows);
+
+                                            $('#queryRouteDropDownSelect').empty();
+                                            for (let row of rows) {
+                                                var x = document.getElementById("queryRouteDropDownSelect");
+                                                var option = document.createElement("option");
+                                                option.text = row.route_name;
+                                                option.value = row.route_name;
+                                                x.add(option, x[0]);
+                                            }
+
+                                        },
+                                        fail: function(error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                },
+                                fail: function(error) {
+                                    console.log(error);
+                                }
+                            });
+                            
+                        },
+                        fail: function(error) {
+                            console.log(error);
+                        }
+                    });
+                }
             },
             fail: function(error) {
                 console.log(error);
             }
         
         });
+
     });
 
-    
-
-    $('#submitpls').submit(function(e){
-
-
+    $('#StoreFile').submit(function(e){
         e.preventDefault();
-        //Pass data to the Ajax call, so it gets passed to the server
+        console.log("Store Files button pressed");
+
         $.ajax({
+            
+            type: 'get',            //Request type
+            dataType: 'json',       //Data type - we will use JSON for almost everything
+            url: '/storeFile',   //The server endpoint we are connecting to
+            data: {
+                loginInfo : dbConf,
+                creatorData : creatorData,
+                filenameData : filenameData,
+                versionData : versionData
+            },
 
-          type: 'get',            //Request type
-          dataType: 'json',       //Data type - we will use JSON for almost everything
-          url: '/uploadFiles',   //The server endpoint we are connecting to
-          data: {
+            success: function (data) {
+                alert("Database has "+data.fCount+" files, "+data.rCount+" routes, and "+ data.pCount +" points");
 
-          },
-          success: function (data) {
-              
-            let thedata = data.somethingElse;
+                let fileList = data.files;
+                //console.log(fileList);
+                $('#queryFileDropDownSelect').empty();
+                for (let row of fileList) {
+                    var x = document.getElementById("queryFileDropDownSelect");
+                    var option = document.createElement("option");
+                    option.text = row.file_name;
+                    option.value = row.file_name;
+                    x.add(option, x[0]);
+                }
 
-            if (thedata.length == 0 ) {
-               jQuery('#FileLog').html("Console: No Files Loaded");
+            },
+            fail: function(error) {
+                console.log(error);
             }
-
-            jQuery('#FileTable tbody').empty();
-            $('#FileSelect').empty();
-            //console.log("Emptying table");
-
-              for (var i = 0; i < thedata.length; i++) {
-              var obj = thedata[i];
-
-              var table = document.getElementById("FileTable").getElementsByTagName('tbody')[0];
-              var row = table.insertRow(0);
-              var cell1 = row.insertCell(0);
-              var cell2 = row.insertCell(1);
-              var cell3 = row.insertCell(2);
-              var cell4 = row.insertCell(3);
-              var cell5 = row.insertCell(4);
-              var cell6 = row.insertCell(5);
-              cell1.innerHTML = '<a href="'+obj.filename+'">'+obj.filename+'</a>';
-              cell2.innerHTML = obj.creator;
-              cell3.innerHTML = obj.version;
-              cell4.innerHTML = obj.numWaypoints;
-              cell5.innerHTML = obj.numTracks;
-              cell6.innerHTML = obj.numRoutes;
-
-              var x = document.getElementById("FileSelect");
-              var option = document.createElement("option");
-              option.text = obj.filename;
-              option.value = obj.filename;
-              x.add(option, x[0]);
-
-
-              }
-
-
-
-
-            console.log("GPX files read");
-
-
-              
-
-              //jQuery('#blah').html("On page load, received string '"+data.somethingElse+"' from server");
-              //We write the object to the console to show that the request was successful
-              //console.log(data);
-
-          },
-          fail: function(error) {
-              // Non-200 return, do something with erro
-              console.log(error);
-          }
-
         });
     });
+
+    $('#cleardata').submit(function(e){
+        e.preventDefault();
+        console.log("Clear data button pressed");
+        
+        let dbConf = {
+            host     : 'dursley.socs.uoguelph.ca',
+            user     : 'sfeigis',
+            password : '1096849',
+            database : 'sfeigis'
+        };
+
+        $.ajax({
+            
+            type: 'get',            //Request type
+            dataType: 'json',       //Data type - we will use JSON for almost everything
+            url: '/cleardata',   //The server endpoint we are connecting to
+            data: {
+                loginInfo : dbConf,
+            },
+
+            success: function (data) {
+                alert("Database has 0 files, 0 routes, and 0 points");
+            },
+            fail: function(error) {
+                console.log(error);
+            }
+        });
+    });
+
+    $('#displaystatus').submit(function(e){
+        e.preventDefault();
+        console.log("Display Status button pressed");
+        
+        $.ajax({
+            
+            type: 'get',            //Request type
+            dataType: 'json',       //Data type - we will use JSON for almost everything
+            url: '/displayDB',   //The server endpoint we are connecting to
+            data: {
+                loginInfo : dbConf,
+            },
+
+            success: function (data) {
+                alert("Database has "+data.fCount+" files, "+data.rCount+" routes, and "+ data.pCount +" points");
+            },
+            fail: function(error) {
+                console.log(error);
+            }
+        });
+    });
+
+
+    $('#executequery').on('change', function(e){ 
+        e.preventDefault();
+        let variable = document.getElementById("executequerySelect").value;
+        console.log(variable);
+
+        if (variable == 1) {
+            $("#queryFileDropDownSelect").hide();
+            $("#queryRouteDropDownSelect").hide();
+            $("#longestDropDownSelect").hide();
+            $("#NameOrLengthDropDownSelect").show();
+            $("#numPointsBox").hide();
+
+        }
+
+        if (variable == 2) {
+            $("#queryFileDropDownSelect").show();
+            $("#queryRouteDropDownSelect").hide();
+            $("#longestDropDownSelect").hide();
+            $("#NameOrLengthDropDownSelect").show();
+            $("#numPointsBox").hide();
+        }
+
+        if (variable == 3) {
+            $("#queryFileDropDownSelect").show();
+            $("#queryRouteDropDownSelect").show();
+            $("#longestDropDownSelect").hide();
+            $("#NameOrLengthDropDownSelect").hide();
+            $("#numPointsBox").hide();
+        }
+
+        if (variable == 4) {
+            $("#queryFileDropDownSelect").show();
+            $("#queryRouteDropDownSelect").hide();
+            $("#longestDropDownSelect").hide();
+            $("#NameOrLengthDropDownSelect").show();
+            $("#numPointsBox").hide();
+        }
+
+        if (variable == 5) {
+            $("#queryFileDropDownSelect").show();
+            $("#queryRouteDropDownSelect").hide();
+            $("#longestDropDownSelect").show();
+            $("#NameOrLengthDropDownSelect").show();
+            $("#numPointsBox").show();
+        }
+
+
+    });
+
+    $('#executeQuery').click(function(e){ 
+
+        e.preventDefault();
+        let variable = document.getElementById("executequerySelect").value;
+        
+
+        
+
+        if (variable == 1) {
+
+            let sort = $("#NameOrLengthDropDownSelect").val();
+
+            $.ajax({
+            
+                type: 'get',            //Request type
+                dataType: 'json',       //Data type - we will use JSON for almost everything
+                url: '/Query1',   //The server endpoint we are connecting to
+                data: {
+                    loginInfo : dbConf,
+                    sortType : sort
+                },
     
+                success: function (data) {
+
+                    jQuery('#QueryTable tbody').empty();
+                    jQuery('#QueryTable thead').empty();
+                    let table = document.getElementById("QueryTable");
+                    let header = table.tHead;
+                    let row = header.insertRow(0);    
+                    let cell = row.insertCell(0);
+                    let cell2 = row.insertCell(1);
+                    let cell3 = row.insertCell(2);
+                    let cell4 = row.insertCell(3);
+                    cell.innerHTML = "Route ID";
+                    cell2.innerHTML = "Route Name";
+                    cell3.innerHTML = "Route Length";
+                    cell4.innerHTML = "GPX ID";
+                    
+                    rows = data.theRows;
+                    //console.log(data.theRows);
+
+                    for (let row of rows) {
+                        console.log(row);
+
+                        let table = document.getElementById("QueryTable").getElementsByTagName('tbody')[0];
+                        let tablerow = table.insertRow(0);
+                        let cell1 = tablerow.insertCell(0);
+                        let cell2 = tablerow.insertCell(1);
+                        let cell3 = tablerow.insertCell(2);
+                        let cell4 = tablerow.insertCell(3);
+                        cell1.innerHTML = row.route_id;
+                        cell2.innerHTML = row.route_name;
+                        cell3.innerHTML = row.route_len;
+                        cell4.innerHTML = row.gpx_id;
+
+                    }
+
+                },
+                fail: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        if (variable == 2) {
+            let sort = $("#NameOrLengthDropDownSelect").val();
+            let filename = $("#queryFileDropDownSelect").val();
+            $.ajax({
+            
+                type: 'get',            //Request type
+                dataType: 'json',       //Data type - we will use JSON for almost everything
+                url: '/Query2',   //The server endpoint we are connecting to
+                data: {
+                    loginInfo : dbConf,
+                    sortType : sort,
+                    filename : filename
+                },
+    
+                success: function (data) {
+                    
+                    jQuery('#QueryTable tbody').empty();
+                    jQuery('#QueryTable thead').empty();
+                    let table = document.getElementById("QueryTable");
+                    let header = table.tHead;
+                    let row = header.insertRow(0);    
+                    let cell = row.insertCell(0);
+                    let cell2 = row.insertCell(1);
+                    let cell3 = row.insertCell(2);
+                    cell.innerHTML = "File Name";
+                    cell2.innerHTML = "Route Name";
+                    cell3.innerHTML = "Route Length";
+
+                    rows = data.theRows;
+
+                    for (let row of rows) {
+                        console.log(row);
+
+                        let table = document.getElementById("QueryTable").getElementsByTagName('tbody')[0];
+                        let tablerow = table.insertRow(0);
+                        let cell1 = tablerow.insertCell(0);
+                        let cell2 = tablerow.insertCell(1);
+                        let cell3 = tablerow.insertCell(2);
+                        cell1.innerHTML = filename;
+                        cell2.innerHTML = row.route_name;
+                        cell3.innerHTML = row.route_len;
+
+                    }
+
+
+
+                },
+                fail: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        if (variable == 3) {
+
+            let routeName = $("#queryRouteDropDownSelect").val();
+            let filename = $("#queryFileDropDownSelect").val();
+
+            $.ajax({
+            
+                type: 'get',            //Request type
+                dataType: 'json',       //Data type - we will use JSON for almost everything
+                url: '/Query3',   //The server endpoint we are connecting to
+                data: {
+                    loginInfo : dbConf,
+                    routeName : routeName,
+                    filename : filename
+                },
+    
+                success: function (data) {
+
+                    jQuery('#QueryTable tbody').empty();
+                    jQuery('#QueryTable thead').empty();
+                    var table = document.getElementById("QueryTable");
+                    var header = table.tHead;
+                    var row = header.insertRow(0);    
+                    var cell = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    var cell4 = row.insertCell(3);
+                    var cell5 = row.insertCell(4);
+                    var cell6 = row.insertCell(5);
+                    cell.innerHTML = "Point ID";
+                    cell2.innerHTML = "Point Index";
+                    cell3.innerHTML = "Latitude";
+                    cell4.innerHTML = "Longitude";
+                    cell5.innerHTML = "Point name";
+                    cell6.innerHTML = "Route ID";
+
+                    rows = data.theRows;
+
+                    for (let row of rows) {
+                        console.log(row);
+
+                        let table = document.getElementById("QueryTable").getElementsByTagName('tbody')[0];
+                        let tablerow = table.insertRow(0);
+                        let cell1 = tablerow.insertCell(0);
+                        let cell2 = tablerow.insertCell(1);
+                        let cell3 = tablerow.insertCell(2);
+                        let cell4 = tablerow.insertCell(3);
+                        let cell5 = tablerow.insertCell(4);
+                        let cell6 = tablerow.insertCell(5);
+                        cell1.innerHTML = row.point_id;
+                        cell2.innerHTML = row.point_index;
+                        cell3.innerHTML = row.latitude;
+                        cell4.innerHTML = row.longitude;
+                        cell5.innerHTML = row.point_name;
+                        cell6.innerHTML = row.route_id;
+
+                    }
+
+                },
+                fail: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        if (variable == 4) {
+
+            let sort = $("#NameOrLengthDropDownSelect").val();
+            let filename = $("#queryFileDropDownSelect").val();
+
+            $.ajax({
+            
+                type: 'get',            //Request type
+                dataType: 'json',       //Data type - we will use JSON for almost everything
+                url: '/Query4',   //The server endpoint we are connecting to
+                data: {
+                    loginInfo : dbConf,
+                    sortType : sort,
+                    filename : filename
+                },
+    
+                success: function (data) {
+
+                    jQuery('#QueryTable tbody').empty();
+                    jQuery('#QueryTable thead').empty();
+                    var table = document.getElementById("QueryTable");
+                    var header = table.tHead;
+                    var row = header.insertRow(0);    
+                    var cell = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    var cell4 = row.insertCell(3);
+                    var cell5 = row.insertCell(4);
+                    var cell6 = row.insertCell(5);
+                    cell.innerHTML = "Point ID";
+                    cell2.innerHTML = "Point Index";
+                    cell3.innerHTML = "Latitude";
+                    cell4.innerHTML = "Longitude";
+                    cell5.innerHTML = "Route name";
+                    cell6.innerHTML = "Route ID";
+
+
+                    rows = data.theRows;
+                    let i = 1;
+                    for (let row of rows) {
+                        console.log(row);
+
+                        let table = document.getElementById("QueryTable").getElementsByTagName('tbody')[0];
+                        let tablerow = table.insertRow(0);
+                        let cell1 = tablerow.insertCell(0);
+                        let cell2 = tablerow.insertCell(1);
+                        let cell3 = tablerow.insertCell(2);
+                        let cell4 = tablerow.insertCell(3);
+                        let cell5 = tablerow.insertCell(4);
+                        let cell6 = tablerow.insertCell(5);
+                        cell1.innerHTML = row.point_id;
+                        cell2.innerHTML = row.point_index;
+                        cell3.innerHTML = row.latitude;
+                        cell4.innerHTML = row.longitude;
+                        if (row.point_name === "") {
+                            cell5.innerHTML = "Unnamed";
+                        }
+                        cell5.innerHTML = row.route_name;
+                        cell6.innerHTML = row.route_id;
+                        i++;
+                    }
+
+
+
+                },
+                fail: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        if (variable == 5) {
+
+            let sort = $("#NameOrLengthDropDownSelect").val();
+            let filename = $("#queryFileDropDownSelect").val();
+            let length = $("#longestDropDownSelect").val();
+            let numPoints = $("#numPointsBox").val();
+
+            $.ajax({
+            
+                type: 'get',            //Request type
+                dataType: 'json',       //Data type - we will use JSON for almost everything
+                url: '/Query5',   //The server endpoint we are connecting to
+                data: {
+                    loginInfo : dbConf,
+                    sortType : sort,
+                    filename : filename,
+                    length : length,
+                    numPoints : numPoints
+                },
+    
+                success: function (data) {
+
+                    jQuery('#QueryTable tbody').empty();
+                    jQuery('#QueryTable thead').empty();
+                    var table = document.getElementById("QueryTable");
+                    var header = table.tHead;
+                    var row = header.insertRow(0);    
+                    var cell = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    cell.innerHTML = "File Name";
+                    cell2.innerHTML = "Route Name";
+                    cell3.innerHTML = "Route Length";
+
+
+
+                    rows = data.theRows;
+
+                    for (let row of rows) {
+                        console.log(row);
+
+                        let table = document.getElementById("QueryTable").getElementsByTagName('tbody')[0];
+                        let tablerow = table.insertRow(0);
+                        let cell1 = tablerow.insertCell(0);
+                        let cell2 = tablerow.insertCell(1);
+                        let cell3 = tablerow.insertCell(2);
+                        cell1.innerHTML = filename;
+                        cell2.innerHTML = row.route_name;
+                        cell3.innerHTML = row.route_len;
+
+                    }
+
+
+
+                },
+                fail: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+
+    });
+
+    $('#queryFileDropDown').on('change', function(e){    
+        e.preventDefault();
+        let variable = document.getElementById("queryFileDropDownSelect").value;
+
+
+        $.ajax({
+                
+            type: 'get',            //Request type
+            dataType: 'json',       //Data type - we will use JSON for almost everything
+            url: '/getRoutesFromFile',   //The server endpoint we are connecting to
+            data: {
+                loginInfo : dbConf,
+                filename : variable
+            },
+
+            success: function (data) {
+                let rows = data.rows;
+
+                console.log(rows);
+
+                $('#queryRouteDropDownSelect').empty();
+                for (let row of rows) {
+                    var x = document.getElementById("queryRouteDropDownSelect");
+                    var option = document.createElement("option");
+                    option.text = row.route_name;
+                    option.value = row.route_name;
+                    x.add(option, x[0]);
+                }
+
+            },
+            fail: function(error) {
+                console.log(error);
+            }
+        });
+    
+    });
+
+    $('#LoginForm').submit(function(e){
+        e.preventDefault();
+        console.log("Login button pressed");
+        
+        let newUsername = $("#userEntryBox").val();
+        let newPassword = $("#passEntryBox").val();
+        let newDatabase = $("#dataEntryBox").val();
+    
+        let newdbConf = {
+            host     : 'dursley.socs.uoguelph.ca',
+        }
+    
+        newdbConf['user'] = newUsername;
+        newdbConf['password'] = newPassword;
+        newdbConf['database'] = newDatabase;
+    
+        $.ajax({
+            
+            type: 'get',            //Request type
+            dataType: 'json',       //Data type - we will use JSON for almost everything
+            url: '/Login',   //The server endpoint we are connecting to
+            data: {
+                loginInfo : newdbConf,
+            },
+    
+            success: function (data) {
+                
+                if (data.connection) {
+    
+                    dbConf = newdbConf;
+                    //console.log(dbConf);
+    
+                    let fileList = data.files;
+                    $('#queryFileDropDownSelect').empty();
+                    //console.log(fileList);
+                    for (let row of fileList) {
+                        var x = document.getElementById("queryFileDropDownSelect");
+                        var option = document.createElement("option");
+                        option.text = row.file_name;
+                        option.value = row.file_name;
+                        x.add(option, x[0]);
+                    }
+    
+                    document.getElementById("cleardataButton").disabled = false;
+                    document.getElementById("storeFilesButton").disabled = false;
+                    document.getElementById("displaystatusButton").disabled = false;
+                    document.getElementById("executeQuery").disabled = false;
+                    document.getElementById("queryFileDropDownSelect").disabled = false;
+                    document.getElementById("queryRouteDropDownSelect").disabled = false;
+                    document.getElementById("NameOrLengthDropDownSelect").disabled = false;
+                    document.getElementById("executequerySelect").disabled = false;
+    
+    
+                    alert("Connection Success!");
+                } else {
+                    alert("Connection Failed, New Login Not accepted.");
+                }
+            },
+            fail: function(error) {
+                console.log(error);
+            }
+        });
+    });
 });
+
+    
+
+
+
+
