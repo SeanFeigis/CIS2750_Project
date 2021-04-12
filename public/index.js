@@ -39,6 +39,8 @@ jQuery(document).ready(function() {
             document.getElementById("queryRouteDropDownSelect").disabled = true;
             document.getElementById("NameOrLengthDropDownSelect").disabled = true;
             document.getElementById("executequerySelect").disabled = true;
+            document.getElementById("longestDropDownSelect").disabled = true;
+            document.getElementById("numPointsBox").disabled = true;
         } else {
             document.getElementById("cleardataButton").disabled = false;
             document.getElementById("storeFilesButton").disabled = false;
@@ -48,6 +50,8 @@ jQuery(document).ready(function() {
             document.getElementById("queryRouteDropDownSelect").disabled = false;
             document.getElementById("NameOrLengthDropDownSelect").disabled = false;
             document.getElementById("executequerySelect").disabled = false;
+            document.getElementById("longestDropDownSelect").disabled = false;
+            document.getElementById("numPointsBox").disabled = false;
         }
 
 
@@ -329,6 +333,7 @@ jQuery(document).ready(function() {
                                 },
                     
                                 success: function (data) {
+                                    alert("Database has "+data.fCount+" files, "+data.rCount+" routes, and "+ data.pCount +" points");
                                     let variable = document.getElementById("queryFileDropDownSelect").value;
                                     $.ajax({
                                             
@@ -488,6 +493,7 @@ jQuery(document).ready(function() {
                                 },
                     
                                 success: function (data) {
+                                    alert("Database has "+data.fCount+" files, "+data.rCount+" routes, and "+ data.pCount +" points");
                                     let variable = document.getElementById("queryFileDropDownSelect").value;
                                     $.ajax({
                                             
@@ -569,6 +575,23 @@ jQuery(document).ready(function() {
                     x.add(option, x[0]);
                 }
 
+
+               
+                document.getElementById("cleardataButton").disabled = false;
+                document.getElementById("executeQuery").disabled = false;
+                document.getElementById("queryFileDropDownSelect").disabled = false;
+                document.getElementById("queryRouteDropDownSelect").disabled = false;
+                document.getElementById("NameOrLengthDropDownSelect").disabled = false;
+                document.getElementById("executequerySelect").disabled = false;
+                document.getElementById("storeFilesButton").disabled = false;
+                document.getElementById("displaystatusButton").disabled = false;
+                document.getElementById("longestDropDownSelect").disabled = false;
+                document.getElementById("numPointsBox").disabled = false;
+
+
+
+
+
             },
             fail: function(error) {
                 console.log(error);
@@ -598,6 +621,15 @@ jQuery(document).ready(function() {
 
             success: function (data) {
                 alert("Database has 0 files, 0 routes, and 0 points");
+                document.getElementById("cleardataButton").disabled = true;
+                document.getElementById("executeQuery").disabled = true;
+                document.getElementById("queryFileDropDownSelect").disabled = true;
+                document.getElementById("queryRouteDropDownSelect").disabled = true;
+                document.getElementById("NameOrLengthDropDownSelect").disabled = true;
+                document.getElementById("executequerySelect").disabled = true;
+                document.getElementById("longestDropDownSelect").disabled = true;
+                document.getElementById("numPointsBox").disabled = true;
+
             },
             fail: function(error) {
                 console.log(error);
@@ -1072,15 +1104,22 @@ jQuery(document).ready(function() {
                         option.value = row.file_name;
                         x.add(option, x[0]);
                     }
+
+                    if ($.isEmptyObject(fileList) == false) {
+                        document.getElementById("cleardataButton").disabled = false;
+                        document.getElementById("executeQuery").disabled = false;
+                        document.getElementById("queryFileDropDownSelect").disabled = false;
+                        document.getElementById("queryRouteDropDownSelect").disabled = false;
+                        document.getElementById("NameOrLengthDropDownSelect").disabled = false;
+                        document.getElementById("executequerySelect").disabled = false;
+                        document.getElementById("longestDropDownSelect").disabled = false;
+                        document.getElementById("numPointsBox").disabled = false;
+                    }
     
-                    document.getElementById("cleardataButton").disabled = false;
+                    
                     document.getElementById("storeFilesButton").disabled = false;
                     document.getElementById("displaystatusButton").disabled = false;
-                    document.getElementById("executeQuery").disabled = false;
-                    document.getElementById("queryFileDropDownSelect").disabled = false;
-                    document.getElementById("queryRouteDropDownSelect").disabled = false;
-                    document.getElementById("NameOrLengthDropDownSelect").disabled = false;
-                    document.getElementById("executequerySelect").disabled = false;
+                   
     
     
                     alert("Connection Success!");
