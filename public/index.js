@@ -6,7 +6,7 @@ jQuery(document).ready(function() {
     var creatorData;
     var filenameData;
     var versionData;
-
+    var serverFiles;
     var dbConf = {};
 
     $("#queryFileDropDownSelect").hide();
@@ -55,7 +55,7 @@ jQuery(document).ready(function() {
         }
 
 
-
+          serverFiles = data.somethingElse;
           let thedata = data.somethingElse;
           creatorData = new Array(thedata.length);
           filenameData = new Array(thedata.length);
@@ -1116,8 +1116,10 @@ jQuery(document).ready(function() {
                         document.getElementById("numPointsBox").disabled = false;
                     }
     
+                    if (serverFiles.length != 0 ) {
+                        document.getElementById("storeFilesButton").disabled = false;
+                    }
                     
-                    document.getElementById("storeFilesButton").disabled = false;
                     document.getElementById("displaystatusButton").disabled = false;
                    
     
