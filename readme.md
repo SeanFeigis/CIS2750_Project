@@ -34,7 +34,8 @@ The assignment 4 functionality begins at the bottom of the page under the 'Assig
 ## Login
 
 The first thing you'll see is the login. Type in the information and press the 'login' button to login. If the login is successful, an alert will pop up notifying you that you logged in successfuly. If the login fails for any reason, a different alert will pop up to notify you of the failure. 
-Please note that after a successful login, the form will only change the login information on correct logins. So if you login correctly and then attempt to login with incorrect information, the new incorrect information will not be stored and you will stay logged in.
+Please note that after a successful login, the form will only change the login information on correct logins. So if you login correctly and then attempt to login with incorrect information, the new incorrect information will not be stored and you will stay logged in. 
+Additionally, uploading a new file will require the user to login again. 
 
 All other A4 functionality is disabled until a successful login occurs.
 
