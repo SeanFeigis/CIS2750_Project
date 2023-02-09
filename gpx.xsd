@@ -650,4 +650,4 @@ Type of GPS fix. none means GPS had no fix. To signify "the fix info is unknown,
 <xsd:maxInclusive value="1023"/>
 </xsd:restriction>
 </xsd:simpleType>
-</xsd:schema>
+</xsd:schema
